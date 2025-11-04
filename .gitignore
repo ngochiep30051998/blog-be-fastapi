@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / compressed files and directories
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Editor/OS specific files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Environment variables
+.env
+
+.flaskenv
+
+# Testing and coverage
+.coverage
+htmlcov/
+
+# Logs and temporary files
+*.log
+tmp/

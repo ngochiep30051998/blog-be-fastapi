@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: personal-blog-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB_NAME:-blog}
+    ports:
+      - "27017:${MONGODB_DB_PORT:-27017}"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - blog-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:${MONGODB_DB_PORT:-27017}/test -u ${MONGO_ROOT_USERNAME:-admin} -p ${MONGO_ROOT_PASSWORD:-password}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  blog-network:
+    driver: bridge
