@@ -6,7 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from src.domain.blog.value_objects.slug import Slug
 from src.domain.blog.value_objects.statuses import PostStatus
-
+from datetime import datetime, timezone
 class MongoPostRepository(PostRepository):
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
@@ -56,7 +56,7 @@ class MongoPostRepository(PostRepository):
     
     async def get_by_id(self, post_id: ObjectId) -> Optional[Post]:
         """Get post by ID"""
-        result = await self.collection.find_one({"_id": post_id})
+        result = await self.collection.find_one({"_id": ObjectId(post_id)})
         if not result:
             return None
         return self._to_post_entity(result)
@@ -88,9 +88,9 @@ class MongoPostRepository(PostRepository):
     
     async def delete(self, post_id: ObjectId) -> bool:
         """Delete post"""
-        result = await self.collection.delete_one({"_id": post_id})
-        return result.deleted_count > 0
-    
+        result = await self.collection.update_one({"_id": ObjectId(post_id)}, {"$set": {"deleted_at": datetime.now(timezone.utc)}})
+        return result.modified_count > 0
+
     async def count_published(self) -> int:
         """Count published posts"""
         return await self.collection.count_documents(

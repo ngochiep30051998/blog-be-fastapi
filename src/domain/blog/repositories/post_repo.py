@@ -14,7 +14,7 @@ class PostRepository(ABC):
         pass
 
     @abstractmethod
-    async def delete(self, post_id):
+    async def delete(self, id):
         pass
 
     @abstractmethod

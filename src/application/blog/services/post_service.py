@@ -1,12 +1,12 @@
 from bson import ObjectId
 from src.domain.blog.entities.post_entity import Post
-from src.domain.blog.repositories.post_repo import PostRepository
 from src.domain.blog.value_objects import Slug
 from src.domain.blog.value_objects.statuses import PostStatus
+from src.infrastructure.mongo.repositories.mongo_post_repo import MongoPostRepository
 
 
 class PostService:
-    def __init__(self, post_repo: PostRepository):
+    def __init__(self, post_repo: MongoPostRepository):
         self.post_repo = post_repo
 
     async def get_all_posts(self, skip: int = 0, limit: int = 10):
@@ -27,12 +27,12 @@ class PostService:
         saved_post = await self.post_repo.create_post(post)
         return saved_post
     
-    async def get_post(self, post_id):
-        return await self.post_repo.get_post(post_id)
+    async def get_by_id(self, post_id):
+        return await self.post_repo.get_by_id(post_id)
     
     async def update_post(self, post_id, post_data):
         return await self.post_repo.update_post(post_id, post_data)
     
-    async def delete_post(self, post_id):
-        return await self.post_repo.delete_post(post_id)
+    async def delete_post(self, post_id)-> bool: 
+        return await self.post_repo.delete(post_id)
     

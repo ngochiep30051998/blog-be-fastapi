@@ -17,7 +17,6 @@ class PostResponse(BaseModel):
         from_attributes=True,
         json_encoders={ObjectId: str},
     )
-    
     id: str
     slug: str
     title: str

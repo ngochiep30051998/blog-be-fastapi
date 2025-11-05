@@ -6,12 +6,11 @@ from bson import ObjectId
 
 from src.domain.blog.value_objects.slug import Slug
 from src.domain.blog.value_objects.statuses import PostStatus
-from src.utils.py_object_id import PyObjectId
 
 @dataclass
 class Post:
     """Post aggregate root"""
-    id: PyObjectId
+    id: ObjectId
     slug: Slug
     title: str
     content: str
@@ -27,7 +26,8 @@ class Post:
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
     published_at: Optional[datetime] = None
-    
+    deleted_at: Optional[datetime] = None
+
     def __eq__(self, other):
         return isinstance(other, Post) and self.id == other.id
     
