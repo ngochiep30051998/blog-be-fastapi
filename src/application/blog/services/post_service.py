@@ -1,5 +1,5 @@
 from bson import ObjectId
-from src.domain.blog.entities.post_entity import Post
+from src.domain.blog.entities.post_entity import PostEntity
 from src.domain.blog.value_objects import Slug
 from src.domain.blog.value_objects.statuses import PostStatus
 from src.infrastructure.mongo.repositories.mongo_post_repo import MongoPostRepository
@@ -14,9 +14,9 @@ class PostService:
         total = await self.post_repo.count_posts()
         return posts,total
     
-    async def create_post(self, title: str, content: str, slug_str: str,  excerpt: str = None, tags: list = [], category: str = None):
+    async def create_post(self, title: str, content: str, slug_str: str,  excerpt: str = None, tags: list = [], category_id: str = None):
         # Create post aggregate
-        post = Post(
+        post = PostEntity(
             id=ObjectId(),
             slug=Slug(slug_str),
             title=title,
@@ -24,7 +24,7 @@ class PostService:
             excerpt=excerpt,
             status=PostStatus.DRAFT,
             tags=tags or [],
-            category=category
+            category_id=category_id
         )
         saved_post = await self.post_repo.create_post(post)
         return saved_post

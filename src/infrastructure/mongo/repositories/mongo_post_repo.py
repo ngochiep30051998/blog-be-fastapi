@@ -1,6 +1,6 @@
 from typing import List, Optional
 from bson import ObjectId
-from src.domain.blog.entities.post_entity import Post
+from src.domain.blog.entities.post_entity import PostEntity
 from src.domain.blog.repositories.post_repo import PostRepository
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -14,9 +14,9 @@ class MongoPostRepository(PostRepository):
     async def list_posts(self, skip: int = 0, limit: int = 10):
         cursor = self.db["posts"].find({"deleted_at": None }).skip(skip).limit(limit)
         posts = await cursor.to_list(length=limit)
-        return [self._to_post_entity(post) for post in posts]
+        return posts
     
-    async def create_post(self, post: Post) -> Post:
+    async def create_post(self, post: PostEntity) -> PostEntity:
         """Save post to MongoDB"""
         post_data = {
             "_id": post.id,
@@ -28,7 +28,7 @@ class MongoPostRepository(PostRepository):
             "author_email": post.author_email,
             "status": post.status.value,
             "tags": post.tags,
-            "category": post.category,
+            "category_id": post.category_id,
             "views_count": post.views_count,
             "likes_count": post.likes_count,
             # "comments": [
@@ -53,22 +53,22 @@ class MongoPostRepository(PostRepository):
             upsert=True
         )
         return post
-    
-    async def get_by_id(self, post_id: ObjectId) -> Optional[Post]:
+
+    async def get_by_id(self, post_id: ObjectId) -> Optional[PostEntity]:
         """Get post by ID"""
         result = await self.collection.find_one({"_id": ObjectId(post_id)})
         if not result:
             return None
         return self._to_post_entity(result)
     
-    async def get_by_slug(self, slug: Slug) -> Optional[Post]:
+    async def get_by_slug(self, slug: Slug) -> Optional[PostEntity]:
         """Get post by slug"""
         result = await self.collection.find_one({"slug": str(slug)})
         if not result:
             return None
         return self._to_post_entity(result)
     
-    async def find_published(self, skip: int = 0, limit: int = 10) -> List[Post]:
+    async def find_published(self, skip: int = 0, limit: int = 10) -> List[PostEntity]:
         """Find published posts"""
         cursor = self.collection.find(
             {"status": PostStatus.PUBLISHED.value}
@@ -77,7 +77,7 @@ class MongoPostRepository(PostRepository):
         results = await cursor.to_list(length=None)
         return [self._to_post_entity(doc) for doc in results]
     
-    async def find_by_tag(self, tag: str, skip: int = 0, limit: int = 10) -> List[Post]:
+    async def find_by_tag(self, tag: str, skip: int = 0, limit: int = 10) -> List[PostEntity]:
         """Find posts by tag"""
         cursor = self.collection.find(
             {"status": PostStatus.PUBLISHED.value, "tags": tag}
@@ -97,7 +97,7 @@ class MongoPostRepository(PostRepository):
             {"status": PostStatus.PUBLISHED.value}
         )
     
-    def _to_post_entity(self, doc: dict) -> Post:
+    def _to_post_entity(self, doc: dict) -> PostEntity:
         """Convert MongoDB document to Post entity"""
         # comments = [
         #     Comment(
@@ -112,7 +112,7 @@ class MongoPostRepository(PostRepository):
         #     for c in doc.get("comments", [])
         # ]
         
-        return Post(
+        return PostEntity(
             id=doc["_id"],
             slug=Slug(doc["slug"]),
             title=doc["title"],
@@ -122,7 +122,7 @@ class MongoPostRepository(PostRepository):
             author_email=doc.get("author_email"),
             status=PostStatus(doc["status"]),
             tags=doc.get("tags", []),
-            category=doc.get("category"),
+            category_id=doc.get("category_id"),
             views_count=doc.get("views_count", 0),
             likes_count=doc.get("likes_count", 0),
             # comments=comments,
@@ -132,7 +132,7 @@ class MongoPostRepository(PostRepository):
             deleted_at=doc.get("deleted_at")
         )
 
-    async def update_post(self, post_id: ObjectId, post_data: dict) -> Optional[Post]:
+    async def update_post(self, post_id: ObjectId, post_data: dict) -> Optional[PostEntity]:
         """Update post by ID"""
         await self.collection.update_one({"_id": post_id}, {"$set": post_data})
         return await self.get_by_id(post_id)

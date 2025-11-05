@@ -3,25 +3,28 @@ from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
 from typing import Any
 
-
 class PyObjectId(ObjectId):
     @classmethod
     def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: GetCoreSchemaHandler
+        cls,
+        source_type: Any,
+        handler: GetCoreSchemaHandler,
     ) -> core_schema.CoreSchema:
-        return core_schema.no_info_wrap_validator_schema(
-            cls._validate,
-            core_schema.str_schema(),
-            serialization=core_schema.to_string_ser_schema(),
-        )
+        return core_schema.no_info_plain_validator_function(cls.validate)
+
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, ObjectId):
+            return cls(v)
+        if isinstance(v, str):
+            if ObjectId.is_valid(v):
+                return cls(v)
+        raise ValueError("Invalid ObjectId")
     
     @classmethod
-    def _validate(cls, v: Any) -> ObjectId:
-        if isinstance(v, ObjectId):
-            return v
-        if isinstance(v, str):
-            try:
-                return ObjectId(v)
-            except Exception:
-                raise ValueError(f"Invalid ObjectId: {v}")
-        raise TypeError(f"ObjectId required, got {type(v)}")
+    def __get_pydantic_json_schema__(cls, core_schema, handler):
+        # return schema type string for ObjectId
+        return {
+            'type': 'string',
+            'pattern': '^[a-fA-F0-9]{24}$'
+        }

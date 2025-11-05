@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime,timezone
 from typing import List, Optional
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
@@ -23,10 +23,10 @@ class PostModel(BaseModel):
     author_email: Optional[str] = None
     status: str = "draft"
     tags: List[str] = []
-    category: Optional[str] = None
+    category_id: Optional[ObjectId] = None
     views_count: int = 0
     likes_count: int = 0
     # comments: List[CommentModel] = []
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     published_at: Optional[datetime] = None

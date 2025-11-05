@@ -1,18 +1,13 @@
-from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from typing import List
 
 from src.application.blog.services.post_service import PostService
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from src.domain.blog.entities.post_entity import Post
 
 from src.infrastructure.mongo.repositories.mongo_post_repo import MongoPostRepository
 from src.presentation.schemas.base_schemas import BaseResponse
 from src.presentation.schemas.post_schemas import PostCreateRequest, PostResponse
-
-
-
-from ...infrastructure.mongo.database import get_database
+from ....infrastructure.mongo.database import get_database
 router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 
 async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> PostService:
@@ -50,7 +45,7 @@ async def create_post(
             slug_str=request.slug,
             excerpt=request.excerpt,
             tags=request.tags,
-            category=request.category
+            category_id=request.category_id
         )
         return BaseResponse(success=True, data=post, message="Post created successfully")
     except ValueError as e:
