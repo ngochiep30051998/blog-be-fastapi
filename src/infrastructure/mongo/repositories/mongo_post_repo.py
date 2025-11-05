@@ -12,7 +12,7 @@ class MongoPostRepository(PostRepository):
         self.db = db
         self.collection = db["posts"]
     async def list_posts(self, skip: int = 0, limit: int = 10):
-        cursor = self.db["posts"].find().skip(skip).limit(limit)
+        cursor = self.db["posts"].find({"deleted_at": None }).skip(skip).limit(limit)
         posts = await cursor.to_list(length=limit)
         return [self._to_post_entity(post) for post in posts]
     
@@ -128,11 +128,15 @@ class MongoPostRepository(PostRepository):
             # comments=comments,
             created_at=doc["created_at"],
             updated_at=doc["updated_at"],
-            published_at=doc.get("published_at")
+            published_at=doc.get("published_at"),
+            deleted_at=doc.get("deleted_at")
         )
 
     async def update_post(self, post_id: ObjectId, post_data: dict) -> Optional[Post]:
         """Update post by ID"""
         await self.collection.update_one({"_id": post_id}, {"$set": post_data})
         return await self.get_by_id(post_id)
+    async def count_posts(self) -> int:
+        """Count all non-deleted posts"""
+        return await self.collection.count_documents({"deleted_at": None})
     

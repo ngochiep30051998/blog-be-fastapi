@@ -32,6 +32,7 @@ class PostResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
 
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:

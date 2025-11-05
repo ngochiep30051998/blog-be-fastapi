@@ -22,12 +22,15 @@ async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> 
 
 
     
-@router.get("/", response_model=BaseResponse[List[PostResponse]], summary="Get all blog posts")
+@router.get("", response_model=BaseResponse[List[PostResponse]], summary="Get all blog posts")
 async def get_posts(
-    service: PostService = Depends(get_post_service)
+    service: PostService = Depends(get_post_service),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Number of posts per page")
 ):
-    posts = await service.get_all_posts()
-    return BaseResponse(success=True, data=posts, message="Posts retrieved successfully")
+    skip = (page - 1) * page_size
+    posts, total = (await service.get_all_posts(skip=skip, limit=page_size))
+    return BaseResponse(success=True, data=posts, total=total, page=page, page_size=page_size)
 
 @router.post(
     "",
@@ -55,7 +58,7 @@ async def create_post(
 
 @router.delete(
     "/{post_id}",
-    response_model=bool,
+    response_model=BaseResponse[bool],
     summary="Delete a blog post"
 )
 async def delete_post(
@@ -67,13 +70,13 @@ async def delete_post(
         post = await service.delete_post(post_id)
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")
-        return post
+        return BaseResponse(success=True, data=post, message="Post deleted successfully")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.get(
     "/{post_id}",
-    response_model=PostResponse,
+    response_model=BaseResponse[PostResponse],
     summary="Get a blog post by ID"
 )
 async def get_post(
@@ -84,4 +87,4 @@ async def get_post(
     post = await service.get_by_id(post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    return post
+    return BaseResponse(success=True, data=post, message="Post retrieved successfully")

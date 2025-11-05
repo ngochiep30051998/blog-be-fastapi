@@ -10,7 +10,9 @@ class PostService:
         self.post_repo = post_repo
 
     async def get_all_posts(self, skip: int = 0, limit: int = 10):
-        return await self.post_repo.list_posts(skip=skip, limit=limit)
+        posts = await self.post_repo.list_posts(skip=skip, limit=limit)
+        total = await self.post_repo.count_posts()
+        return posts,total
     
     async def create_post(self, title: str, content: str, slug_str: str,  excerpt: str = None, tags: list = [], category: str = None):
         # Create post aggregate

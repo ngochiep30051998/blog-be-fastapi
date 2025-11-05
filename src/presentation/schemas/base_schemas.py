@@ -9,3 +9,8 @@ class BaseResponse(GenericModel, Generic[T]):
     success: bool
     message: Optional[str] = None
     data: Optional[T] = None
+    total: Optional[int] = None
+    page: Optional[int] = None
+    page_size: Optional[int] = None
+
+
