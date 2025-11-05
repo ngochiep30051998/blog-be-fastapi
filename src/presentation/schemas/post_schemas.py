@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, List
+from bson import ObjectId
+from pydantic import BaseModel, Field, ConfigDict, model_validator
+from typing import Any, Optional, List
 from datetime import datetime
 
 class PostCreateRequest(BaseModel):
@@ -13,10 +14,11 @@ class PostCreateRequest(BaseModel):
 class PostResponse(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
-        from_attributes=True
+        from_attributes=True,
+        json_encoders={ObjectId: str},
     )
     
-    id: str = Field(alias="_id")
+    id: str
     slug: str
     title: str
     content: str
@@ -31,3 +33,11 @@ class PostResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
+
+    @model_validator(mode="before")
+    def convert_objectid(cls, values: Any) -> Any:
+        if hasattr(values, 'slug') and not isinstance(values.slug, str):
+            values.slug = str(values.slug)
+        if hasattr(values, 'id') and isinstance(values.id, ObjectId):
+            values.id = str(values.id)
+        return values

@@ -6,11 +6,12 @@ from bson import ObjectId
 
 from src.domain.blog.value_objects.slug import Slug
 from src.domain.blog.value_objects.statuses import PostStatus
+from src.utils.py_object_id import PyObjectId
 
 @dataclass
 class Post:
     """Post aggregate root"""
-    id: ObjectId
+    id: PyObjectId
     slug: Slug
     title: str
     content: str

@@ -19,31 +19,14 @@ async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> 
     post_repo = MongoPostRepository(db)
     return PostService(post_repo)
 
-def post_entity_to_response(post: Post) -> dict:
-    """Convert Post entity to response dict"""
-    return {
-        "_id": str(post.id),
-        "slug": str(post.slug),
-        "title": post.title,
-        "content": post.content,
-        "excerpt": post.excerpt,
-        "author_name": post.author_name,
-        "status": post.status.value,
-        "tags": post.tags,
-        "category": post.category,
-        "views_count": post.views_count,
-        "likes_count": post.likes_count,
-        "created_at": post.created_at,
-        "updated_at": post.updated_at,
-        "published_at": post.published_at
-    }
+
     
 @router.get("/", response_model=List[PostResponse], summary="Get all blog posts")
 async def get_posts(
     service: PostService = Depends(get_post_service)
 ):
     posts = await service.get_all_posts()
-    return [post_entity_to_response(post) for post in posts]
+    return posts
 
 @router.post(
     "",
@@ -65,6 +48,6 @@ async def create_post(
             tags=request.tags,
             category=request.category
         )
-        return post_entity_to_response(post)
+        return post
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
