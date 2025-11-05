@@ -1,12 +1,13 @@
 # src/main.py
+import uvicorn
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .config.settings import settings
-from .infrastructure.mongo.database import MongoDatabase
-from .presentation.routers import blog
 
+from src.config import settings
+from src.infrastructure.mongo.database import MongoDatabase
+from src.presentation.routers import blog
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown"""
@@ -42,3 +43,6 @@ async def root():
 @app.get("/health", tags=["health"])
 async def health_check():
     return {"status": "healthy"}
+
+if __name__ == "__main__":
+    uvicorn.run("src.main:app", host="0.0.0.0", port=settings.APP_PORT, reload=True)
