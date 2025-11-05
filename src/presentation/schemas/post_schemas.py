@@ -4,6 +4,7 @@ from typing import Any, Optional, List
 from datetime import datetime
 
 from src.domain.blog.value_objects.slug import Slug
+from src.presentation.schemas.category_schema import CategoryResponse
 from src.utils.py_object_id import PyObjectId
 
 class PostCreateRequest(BaseModel):
@@ -40,7 +41,7 @@ class PostResponse(BaseModel):
     author_name: Optional[str] = None
     status: str
     tags: List[str]
-    category_id: Optional[PyObjectId] = None
+    category: Optional[CategoryResponse] = None  # đổi category_id thành object
     views_count: int
     likes_count: int
     # comments: List[CommentResponse] = []
@@ -51,15 +52,19 @@ class PostResponse(BaseModel):
 
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
-        # Đổi slug thành string nếu cần
-        if 'slug' in values and not isinstance(values['slug'], str):
-            values['slug'] = str(values['slug'])
-        # ObjectId trong _id (nhờ alias, trường id sẽ nhận _id)
-        if '_id' in values and isinstance(values['_id'], ObjectId):
-            values['_id'] = str(values['_id'])
-        # ObjectId trong _id (nhờ alias, trường id sẽ nhận _id)
-        if 'category_id' in values and isinstance(values['category_id'], ObjectId):
-            values['category_id'] = str(values['category_id'])
+        if isinstance(values, dict):
+            if '_id' in values:
+                values['_id'] = str(values['_id'])
+            if 'slug' in values and not isinstance(values['slug'], str):
+                values['slug'] = str(values['slug'])
+            if 'category' in values and values['category']:
+                # Convert ObjectId trong category
+                cat = values['category']
+                if '_id' in cat and isinstance(cat['_id'], ObjectId):
+                    cat['_id'] = str(cat['_id'])
+                if 'parent_id' in cat and isinstance(cat['parent_id'], ObjectId):
+                    cat['parent_id'] = str(cat['parent_id'])
+                values['category'] = cat
         return values
     @field_validator('slug', mode='before')
     def validate_slug(cls, v):

@@ -12,7 +12,21 @@ class MongoPostRepository(PostRepository):
         self.db = db
         self.collection = db["posts"]
     async def list_posts(self, skip: int = 0, limit: int = 10):
-        cursor = self.db["posts"].find({"deleted_at": None }).skip(skip).limit(limit)
+        pipeline = [
+            {"$match": {"deleted_at": None}},
+            {
+                "$lookup": {
+                    "from": "categories",
+                    "localField": "category_id",
+                    "foreignField": "_id",
+                    "as": "category"
+                }
+            },
+            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}},
+            {"$skip": skip},
+            {"$limit": limit}
+        ]
+        cursor = self.db["posts"].aggregate(pipeline)
         posts = await cursor.to_list(length=limit)
         return posts
     
