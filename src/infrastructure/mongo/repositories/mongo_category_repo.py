@@ -51,8 +51,8 @@ class MongoCategoryRepository(CategoryRepository):
         return category_data
 
     async def delete(self, id):
-        result = await self.collection.delete_one({"_id": id})
-        return result.deleted_count > 0
+        result = await self.collection.update_one({"_id": id}, {"$set": {"deleted_at": datetime.utcnow()}})
+        return result.modified_count > 0
 
     async def list_categories(self, skip: int = 0, limit: int = 10):
         # 1. Lấy các category gốc (parent_id = None) với phân trang

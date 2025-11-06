@@ -26,3 +26,4 @@ class CategoryService:
 
         saved_category = await self.category_repo.create_category(category_data)
         return saved_category
+    

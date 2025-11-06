@@ -68,19 +68,32 @@ class MongoPostRepository(PostRepository):
         )
         return post
 
-    async def get_by_id(self, post_id: ObjectId) -> Optional[PostEntity]:
-        """Get post by ID"""
-        result = await self.collection.find_one({"_id": ObjectId(post_id)})
+    async def get_by_id(self, post_id: ObjectId) -> Optional[dict]:
+        pipeline = [
+            {"$match": {"_id": ObjectId(post_id),"deleted_at": None}},  # tìm post theo id
+            {
+                "$lookup": {
+                    "from": "categories",            # tên collection categories
+                    "localField": "category_id",     # trường trong posts
+                    "foreignField": "_id",           # trường trong categories
+                    "as": "category"            # field trả về kèm
+                }
+            },
+            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}}  # tách mảng thành object hoặc null
+        ]
+
+        cursor = self.collection.aggregate(pipeline)
+        result = await cursor.to_list(length=1)
         if not result:
             return None
-        return self._to_post_entity(result)
+        return result[0]
     
     async def get_by_slug(self, slug: Slug) -> Optional[PostEntity]:
         """Get post by slug"""
         result = await self.collection.find_one({"slug": str(slug)})
         if not result:
             return None
-        return self._to_post_entity(result)
+        return result
     
     async def find_published(self, skip: int = 0, limit: int = 10) -> List[PostEntity]:
         """Find published posts"""
@@ -89,7 +102,7 @@ class MongoPostRepository(PostRepository):
         ).sort("published_at", -1).skip(skip).limit(limit)
         
         results = await cursor.to_list(length=None)
-        return [self._to_post_entity(doc) for doc in results]
+        return results
     
     async def find_by_tag(self, tag: str, skip: int = 0, limit: int = 10) -> List[PostEntity]:
         """Find posts by tag"""
@@ -98,7 +111,7 @@ class MongoPostRepository(PostRepository):
         ).sort("published_at", -1).skip(skip).limit(limit)
         
         results = await cursor.to_list(length=None)
-        return [self._to_post_entity(doc) for doc in results]
+        return results
     
     async def delete(self, post_id: ObjectId) -> bool:
         """Delete post"""
@@ -111,41 +124,6 @@ class MongoPostRepository(PostRepository):
             {"status": PostStatus.PUBLISHED.value}
         )
     
-    def _to_post_entity(self, doc: dict) -> PostEntity:
-        """Convert MongoDB document to Post entity"""
-        # comments = [
-        #     Comment(
-        #         id=c["_id"],
-        #         author_name=c["author_name"],
-        #         author_email=c["author_email"],
-        #         content=c["content"],
-        #         status=CommentStatus(c["status"]),
-        #         likes=c.get("likes", 0),
-        #         created_at=c["created_at"]
-        #     )
-        #     for c in doc.get("comments", [])
-        # ]
-        
-        return PostEntity(
-            id=doc["_id"],
-            slug=Slug(doc["slug"]),
-            title=doc["title"],
-            content=doc["content"],
-            excerpt=doc.get("excerpt"),
-            author_name=doc.get("author_name"),
-            author_email=doc.get("author_email"),
-            status=PostStatus(doc["status"]),
-            tags=doc.get("tags", []),
-            category_id=doc.get("category_id"),
-            views_count=doc.get("views_count", 0),
-            likes_count=doc.get("likes_count", 0),
-            # comments=comments,
-            created_at=doc["created_at"],
-            updated_at=doc["updated_at"],
-            published_at=doc.get("published_at"),
-            deleted_at=doc.get("deleted_at")
-        )
-
     async def update_post(self, post_id: ObjectId, post_data: dict) -> Optional[PostEntity]:
         """Update post by ID"""
         await self.collection.update_one({"_id": post_id}, {"$set": post_data})

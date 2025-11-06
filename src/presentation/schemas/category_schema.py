@@ -32,7 +32,6 @@ class CategoryResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
-    deleted_at: Optional[datetime] = None
     children: List['CategoryResponse'] = []  # Thêm trường children đệ quy
 
     @model_validator(mode="before")
@@ -55,4 +54,4 @@ class CategoryResponse(BaseModel):
         return v
 
 # Để Pydantic nhận diện được đệ quy, gọi update_forward_refs sau định nghĩa
-CategoryResponse.update_forward_refs()
+CategoryResponse.model_rebuild()
