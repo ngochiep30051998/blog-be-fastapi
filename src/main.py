@@ -6,11 +6,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import settings
+from src.infrastructure.middleware.auth_middleware import AuthMiddleware
 from src.infrastructure.mongo.database import MongoDatabase
 from src.domain.posts import api as postApi
 from src.domain.categories import api as categoriesApi
 from src.domain.auth import api as authApi
 from src.domain.users import api as usersApi
+from fastapi.openapi.utils import get_openapi
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown"""
@@ -36,6 +39,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Custom OpenAPI schema để hiển thị button Authorize
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title="Blog API",
+        version="1.0.0",
+        description="API with JWT Bearer Authentication",
+        routes=app.routes,
+    )
+    
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "Enter your JWT token (without 'Bearer' prefix)"
+        }
+    }
+
+    public_paths = settings.PUBLIC_ROUTES
+    
+    for path, path_item in openapi_schema["paths"].items():
+        if path in public_paths:
+            continue
+        
+        for method, operation in path_item.items():
+            if method in ["get", "post", "put", "delete", "patch"]:
+                operation["security"] = [{"BearerAuth": []}]
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+# Gán custom OpenAPI
+app.openapi = custom_openapi
+
+app.add_middleware(AuthMiddleware)  
 # Routes
 app.include_router(postApi.router)
 app.include_router(categoriesApi.router)
