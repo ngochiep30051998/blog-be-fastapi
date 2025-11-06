@@ -39,7 +39,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Custom OpenAPI schema để hiển thị button Authorize
+# Custom OpenAPI schema to show button Authorize
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -73,7 +73,7 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-# Gán custom OpenAPI
+# apply custom OpenAPI
 app.openapi = custom_openapi
 
 app.add_middleware(AuthMiddleware)  
