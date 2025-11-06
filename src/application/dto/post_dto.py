@@ -2,9 +2,8 @@ from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 from typing import Any, Optional, List
 from datetime import datetime
-
-from src.domain.blog.value_objects.slug import Slug
-from src.presentation.schemas.category_schema import CategoryResponse
+from src.application.dto.category_dto import CategoryResponse
+from src.core.value_objects.slug import Slug
 from src.utils.py_object_id import PyObjectId
 
 class PostCreateRequest(BaseModel):

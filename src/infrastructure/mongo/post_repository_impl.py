@@ -1,11 +1,10 @@
 from typing import List, Optional
 from bson import ObjectId
-from src.domain.blog.entities.post_entity import PostEntity
-from src.domain.blog.repositories.post_repo import PostRepository
+from src.core.value_objects.slug import Slug
+from src.core.value_objects.statuses import PostStatus
+from src.domain.posts.entity import PostEntity
+from src.domain.posts.repository import PostRepository
 from motor.motor_asyncio import AsyncIOMotorDatabase
-
-from src.domain.blog.value_objects.slug import Slug
-from src.domain.blog.value_objects.statuses import PostStatus
 from datetime import datetime, timezone
 class MongoPostRepository(PostRepository):
     def __init__(self, db: AsyncIOMotorDatabase):

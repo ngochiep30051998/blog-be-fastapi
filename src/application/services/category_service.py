@@ -1,6 +1,6 @@
-from src.domain.blog.entities.catetory_entity import CategoryEntity
-from src.domain.blog.value_objects.slug import Slug
-from src.infrastructure.mongo.repositories.mongo_category_repo import MongoCategoryRepository
+from src.core.value_objects.slug import Slug
+from src.domain.categories.entity import CategoryEntity
+from src.infrastructure.mongo.category_repository_impl import MongoCategoryRepository
 from src.utils.py_object_id import PyObjectId
 from bson import ObjectId
 

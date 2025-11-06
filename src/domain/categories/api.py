@@ -2,11 +2,13 @@ from typing import List
 from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi import APIRouter, HTTPException, Depends, Query, status
-from src.application.blog.services.category_service import CategoryService
-from src.infrastructure.mongo.repositories.mongo_category_repo import MongoCategoryRepository
-from src.presentation.schemas.base_schema import BaseResponse
-from src.presentation.schemas.category_schema import CategoryCreateRequest, CategoryResponse
-from ....infrastructure.mongo.database import get_database
+
+from src.application.dto.base_dto import BaseResponse
+from src.application.dto.category_dto import CategoryCreateRequest, CategoryResponse
+from src.application.services.category_service import CategoryService
+from src.infrastructure.mongo.category_repository_impl import MongoCategoryRepository
+
+from ...infrastructure.mongo.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
 router = APIRouter(prefix="/api/v1/categories", tags=["categories"])
 

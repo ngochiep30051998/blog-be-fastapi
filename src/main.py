@@ -7,8 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import settings
 from src.infrastructure.mongo.database import MongoDatabase
-from src.presentation.routers.blog import post_router
-from src.presentation.routers.blog import category_router
+from src.domain.posts import api as postApi
+from src.domain.categories import api as categoriesApi
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown"""
@@ -35,8 +35,8 @@ app.add_middleware(
 )
 
 # Routes
-app.include_router(post_router.router)
-app.include_router(category_router.router)
+app.include_router(postApi.router)
+app.include_router(categoriesApi.router)
 
 @app.get("/", tags=["health"])
 async def root():

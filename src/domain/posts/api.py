@@ -1,13 +1,12 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from typing import List
-
-from src.application.blog.services.post_service import PostService
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from src.infrastructure.mongo.repositories.mongo_post_repo import MongoPostRepository
-from src.presentation.schemas.base_schema import BaseResponse
-from src.presentation.schemas.post_schema import PostCreateRequest, PostResponse
-from ....infrastructure.mongo.database import get_database
+from src.application.dto.base_dto import BaseResponse
+from src.application.dto.post_dto import PostCreateRequest, PostResponse
+from src.application.services.post_service import PostService
+from src.infrastructure.mongo.post_repository_impl import MongoPostRepository
+from ...infrastructure.mongo.database import get_database
 router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 
 async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> PostService:

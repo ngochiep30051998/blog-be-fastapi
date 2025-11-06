@@ -1,11 +1,9 @@
 from datetime import datetime,timezone
 from typing import List, Optional
-
 from bson import ObjectId
 from pydantic import BaseModel, Field
-
-from src.domain.blog.value_objects.slug import Slug
-from src.domain.blog.value_objects.statuses import PostStatus
+from src.core.value_objects.slug import Slug
+from src.core.value_objects.statuses import PostStatus
 from src.utils.py_object_id import PyObjectId
 
 class PostEntity(BaseModel):

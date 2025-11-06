@@ -3,7 +3,7 @@ from datetime import datetime,timezone
 from typing import Optional
 from bson import ObjectId
 from pydantic import BaseModel, Field
-from src.domain.blog.value_objects.slug import Slug
+from src.core.value_objects.slug import Slug
 from src.utils.py_object_id import PyObjectId
 
 

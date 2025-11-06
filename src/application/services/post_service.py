@@ -1,9 +1,8 @@
 from bson import ObjectId
-from src.domain.blog.entities.post_entity import PostEntity
-from src.domain.blog.value_objects import Slug
-from src.domain.blog.value_objects.statuses import PostStatus
-from src.infrastructure.mongo.repositories.mongo_post_repo import MongoPostRepository
-
+from src.core.value_objects.slug import Slug
+from src.core.value_objects.statuses import PostStatus
+from src.domain.posts.entity import PostEntity
+from src.infrastructure.mongo.post_repository_impl import MongoPostRepository
 
 class PostService:
     def __init__(self, post_repo: MongoPostRepository):

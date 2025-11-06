@@ -2,8 +2,8 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from bson import ObjectId
-from src.domain.blog.entities.catetory_entity import CategoryEntity
-from src.domain.blog.repositories.category_repo import CategoryRepository
+from src.domain.categories.entity import CategoryEntity
+from src.domain.categories.repository import CategoryRepository
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 class MongoCategoryRepository(CategoryRepository):
