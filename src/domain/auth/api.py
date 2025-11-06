@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from src.application.dto.auth_dto import LoginResponse, RegisterRequest, RegisterResponse
+from src.application.dto.auth_dto import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse
 from src.application.dto.base_dto import BaseResponse
 from src.application.services.user_service import UserService
 from src.infrastructure.mongo.database import get_database
@@ -29,13 +29,12 @@ async def register_user(
 
 @router.post("/login", summary="User login", response_model=BaseResponse[LoginResponse])
 async def login_user(
-    email: str,
-    password: str,
+    request: LoginRequest,
     service: UserService = Depends(get_user_service)
 ):
     """User login"""
-    user = await service.authenticate_user(email, password)
+    user = await service.authenticate_user(request.email, request.password)
     if not user:
         return BaseResponse[LoginResponse](success=False, message="Invalid email or password", data=None)
-    access_token = service.create_access_token(data={"sub": str(user.id)})
+    access_token = service.create_access_token(data={"sub": str(user["_id"])})
     return BaseResponse[LoginResponse](success=True, data=LoginResponse(access_token=access_token, token_type="bearer"))

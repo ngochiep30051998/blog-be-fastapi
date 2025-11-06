@@ -40,7 +40,7 @@ class UserService:
         user = await self.user_repo.get_by_email(email)
         if not user:
             return False
-        if not self.verify_password(password, user.password_hash):
+        if not self.verify_password(password, user.get('password_hash')):
             return False
         return user
     

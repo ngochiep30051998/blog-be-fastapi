@@ -9,7 +9,7 @@ class LoginResponse(BaseModel):
     token_type: str
 
 class LoginRequest(BaseModel):
-    email: Email
+    email: str
     password: str
 
 class RegisterRequest(BaseModel):
