@@ -6,6 +6,10 @@ class UserRepository(ABC):
         pass
 
     @abstractmethod
+    async def get_by_id(self, user_id):
+        pass
+
+    @abstractmethod
     async def update_user(self, user_id, user_data):
         pass
 

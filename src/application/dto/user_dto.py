@@ -14,6 +14,8 @@ class UserResponse(BaseModel):
     )
     id: PyObjectId = Field(..., alias="_id") 
     full_name: str
-    email: Email
+    email: str
+    date_of_birth: str | None = None
+    role: str
     created_at: datetime
     updated_at: datetime

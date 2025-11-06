@@ -10,6 +10,7 @@ from src.infrastructure.mongo.database import MongoDatabase
 from src.domain.posts import api as postApi
 from src.domain.categories import api as categoriesApi
 from src.domain.auth import api as authApi
+from src.domain.users import api as usersApi
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown"""
@@ -39,6 +40,7 @@ app.add_middleware(
 app.include_router(postApi.router)
 app.include_router(categoriesApi.router)
 app.include_router(authApi.router)
+app.include_router(usersApi.router)
 
 @app.get("/", tags=["health"])
 async def root():

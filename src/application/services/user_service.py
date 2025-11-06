@@ -62,3 +62,7 @@ class UserService:
         access_token = self.create_access_token(data={"sub": str(saved_user["_id"])})
 
         return access_token
+    
+    async def get_by_id(self, user_id: str):
+        user =  await self.user_repo.get_by_id(user_id)
+        return user

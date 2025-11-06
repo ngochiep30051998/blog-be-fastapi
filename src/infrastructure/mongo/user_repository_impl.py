@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+
+from bson import ObjectId
 from src.domain.users.entity import UserEntity
 from src.domain.users.repository import UserRepository
 
@@ -44,3 +46,6 @@ class MongoUserRepository(UserRepository):
         cursor = self.collection.find({"deleted_at": None}).skip(skip).limit(limit)
         users = await cursor.to_list(length=limit)
         return users
+    async def get_by_id(self, user_id: str) -> UserEntity:
+        result = await self.collection.find_one({"_id": ObjectId(user_id), "deleted_at": None})
+        return result
