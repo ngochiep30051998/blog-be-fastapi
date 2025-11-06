@@ -82,3 +82,19 @@ async def get_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return BaseResponse(success=True, data=post, message="Post retrieved successfully")
+
+@router.put(
+    "/{post_id}",
+    response_model=BaseResponse[PostResponse],
+    summary="Update a blog post"
+)
+async def update_post(
+    post_id: str,
+    request: PostCreateRequest,
+    service: PostService = Depends(get_post_service)
+):
+    """Update a blog post"""
+    post = await service.update_post(post_id, request)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return BaseResponse(success=True, data=post, message="Post updated successfully")
