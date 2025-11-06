@@ -23,7 +23,8 @@ class Settings(BaseSettings):
         "/api/v1/auth/register",
         "/docs",
         "/redoc",
-        "/openapi.json"
+        "/openapi.json",
+        "/health"
     ]
     class Config:
         env_file = ".env"
