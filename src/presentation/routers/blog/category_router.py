@@ -4,7 +4,7 @@ from fastapi.params import Depends
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from src.application.blog.services.category_service import CategoryService
 from src.infrastructure.mongo.repositories.mongo_category_repo import MongoCategoryRepository
-from src.presentation.schemas.base_schemas import BaseResponse
+from src.presentation.schemas.base_schema import BaseResponse
 from src.presentation.schemas.category_schema import CategoryCreateRequest, CategoryResponse
 from ....infrastructure.mongo.database import get_database
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -47,3 +47,57 @@ async def create_category(
         return BaseResponse(success=True, data=category, message="category created successfully")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.delete(
+    "/{category_id}",
+    response_model=BaseResponse[bool],
+    summary="Delete a category"
+)
+async def delete_category(
+    category_id: str,
+    service: CategoryService = Depends(get_category_service),
+):
+    """Delete a category"""
+    deleted = await service.delete_category(category_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return BaseResponse(success=True, message="Category deleted successfully", data=deleted)
+
+@router.put(
+    "/{category_id}",
+    response_model=BaseResponse[CategoryResponse],
+    summary="Update a category"
+)
+async def update_category(
+    category_id: str,
+    request: CategoryCreateRequest,
+    service: CategoryService = Depends(get_category_service),
+):
+    """Update a category"""
+    try:
+        updated_category = await service.update_category(
+            category_id=category_id,
+            name=request.name,
+            description=request.description,
+            slug_str=request.slug,
+            parent_id=request.parent_id or None
+        )
+        if not updated_category:
+            raise HTTPException(status_code=404, detail="Category not found")
+        return BaseResponse(success=True, data=updated_category, message="Category updated successfully")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+@router.get(
+    "/{category_id}",
+    response_model=BaseResponse[CategoryResponse],
+    summary="Get a category by ID"
+)
+async def get_category(
+    category_id: str,
+    service: CategoryService = Depends(get_category_service),
+):
+    """Get a category by ID"""
+    category = await service.get_category_by_id(category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return BaseResponse(success=True, data=category)

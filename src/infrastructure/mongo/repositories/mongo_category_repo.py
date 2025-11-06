@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime, timezone
 
 from bson import ObjectId
 from src.domain.blog.entities.catetory_entity import CategoryEntity
@@ -43,15 +44,15 @@ class MongoCategoryRepository(CategoryRepository):
         return category_data
 
     async def get_by_id(self, category_id):
-        result = await self.collection.find_one({"_id": category_id})
+        result = await self.collection.find_one({"_id": ObjectId(category_id)})
         return result
 
     async def update_category(self, category_id, category_data):
-        await self.collection.update_one({"_id": category_id}, {"$set": category_data})
+        await self.collection.update_one({"_id": ObjectId(category_id)}, {"$set": category_data})
         return category_data
 
     async def delete(self, id):
-        result = await self.collection.update_one({"_id": id}, {"$set": {"deleted_at": datetime.utcnow()}})
+        result = await self.collection.update_one({"_id": ObjectId(id)}, {"$set": {"deleted_at": datetime.now(timezone.utc)}})
         return result.modified_count > 0
 
     async def list_categories(self, skip: int = 0, limit: int = 10):

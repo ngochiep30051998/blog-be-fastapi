@@ -5,8 +5,8 @@ from src.application.blog.services.post_service import PostService
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from src.infrastructure.mongo.repositories.mongo_post_repo import MongoPostRepository
-from src.presentation.schemas.base_schemas import BaseResponse
-from src.presentation.schemas.post_schemas import PostCreateRequest, PostResponse
+from src.presentation.schemas.base_schema import BaseResponse
+from src.presentation.schemas.post_schema import PostCreateRequest, PostResponse
 from ....infrastructure.mongo.database import get_database
 router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 

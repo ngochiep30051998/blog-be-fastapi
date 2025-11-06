@@ -27,3 +27,22 @@ class CategoryService:
         saved_category = await self.category_repo.create_category(category_data)
         return saved_category
     
+    async def delete_category(self, category_id: str):
+        deleted = await self.category_repo.delete(category_id)
+        return deleted
+    async def update_category(self, category_id: str, name: str = None, description: str = None, slug_str: str = None, parent_id: str = None):
+        update_data = {}
+        if name is not None:
+            update_data["name"] = name
+        if description is not None:
+            update_data["description"] = description
+        if slug_str is not None:
+            update_data["slug"] = str(Slug(slug_str))
+        if parent_id is not None:
+            update_data["parent_id"] = ObjectId(parent_id)
+
+        updated_category = await self.category_repo.update_category(category_id, update_data)
+        return updated_category
+    async def get_category_by_id(self, category_id: str):
+        category = await self.category_repo.get_by_id(category_id)
+        return category
