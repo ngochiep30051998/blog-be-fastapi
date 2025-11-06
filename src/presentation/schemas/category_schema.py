@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, List, Optional
 from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from datetime import datetime
@@ -23,7 +23,7 @@ class CategoryResponse(BaseModel):
         from_attributes=True,
         json_encoders={PyObjectId: str, ObjectId: str, Slug: str},
     )
-    id: PyObjectId = Field(..., alias="_id")  # alias để map chính xác _id MongoDB
+    id: PyObjectId = Field(..., alias="_id")
     name: str
     description: Optional[str] = None
     slug: Slug
@@ -33,6 +33,7 @@ class CategoryResponse(BaseModel):
     updated_at: datetime
     published_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
+    children: List['CategoryResponse'] = []  # Thêm trường children đệ quy
 
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
@@ -52,3 +53,6 @@ class CategoryResponse(BaseModel):
         if isinstance(v, str):
             return Slug(value=v)
         return v
+
+# Để Pydantic nhận diện được đệ quy, gọi update_forward_refs sau định nghĩa
+CategoryResponse.update_forward_refs()

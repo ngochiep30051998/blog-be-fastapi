@@ -15,22 +15,14 @@ class CategoryService:
 
     async def create_category(self, name: str, description: str = None, slug_str: str = None, parent_id: str = None):
 
-        parent_object_id = None
-        if parent_id is not None:
-            parent_object_id = ObjectId(parent_id)
-            parent = await self.category_repo.get_by_id(ObjectId(parent_id))
-            if not parent:
-                raise ValueError("Parent category does not exist")
+
         
         category_data = CategoryEntity(
             name=name,
             description=description,
             slug=Slug(slug_str),
-            parent_id= ObjectId(parent_object_id) if parent_object_id else None
+            parent_id= ObjectId(parent_id) if parent_id else None
         )
-        
-        if parent_id is not None:
-            path = parent['path'] + '/' + str(category_data.id)
-            category_data.path = path
+
         saved_category = await self.category_repo.create_category(category_data)
         return saved_category
