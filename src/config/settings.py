@@ -13,7 +13,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
     DEBUG: bool
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
-    APP_PORT: int = 8001
+    APP_PORT: int = 8000
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
     class Config:
         env_file = ".env"
 
