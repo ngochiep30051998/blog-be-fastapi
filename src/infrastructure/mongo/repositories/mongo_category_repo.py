@@ -12,13 +12,13 @@ class MongoCategoryRepository(CategoryRepository):
 
     async def build_category_path(self, parent_id: ObjectId) -> str:
         if parent_id is None:
-            # Root node, path mặc định, ví dụ rỗng hoặc "/"
+            # Root node, default path, e.g. empty or "/"
             return ""
         parent = await self.collection.find_one({"_id": parent_id})
         if not parent:
             raise ValueError("Parent category not found")
         parent_path = parent.get("path", "")
-        # Nối chuỗi path: parent_path + "/" + parent_id (chuyển parent_id thành string)
+        # Concatenate path: parent_path + "/" + parent_id (convert parent_id to string)
         new_path = f"{parent_path}/{str(parent_id)}" if parent_path else f"/{str(parent_id)}"
 
         return new_path
@@ -55,7 +55,7 @@ class MongoCategoryRepository(CategoryRepository):
         return result.modified_count > 0
 
     async def list_categories(self, skip: int = 0, limit: int = 10):
-        # 1. Lấy các category gốc (parent_id = None) với phân trang
+        # 1. Get root categories (parent_id = None) with pagination
         root_cursor = self.db["categories"].find({
             "parent_id": None,
             "deleted_at": None
@@ -65,25 +65,25 @@ class MongoCategoryRepository(CategoryRepository):
         if not roots:
             return []
 
-        # 2. Tạo điều kiện regex để lấy tất cả cây con dựa trên path
+        # 2. Create regex conditions to get all child trees based on path
         regex_conditions = []
         for root in roots:
             root_id_str = str(root["_id"])
-            # vì root path là "", các con sẽ có path bắt đầu bằng /root_id
+            # since root path is "", children will have path starting with /root_id
             regex_conditions.append({"path": {"$regex": f"^/{root_id_str}"}})
 
         print("Regex Conditions:", regex_conditions)
-        # 3. Lấy tất cả cây con trong các cây root trên (bằng $or + regex)
+        # 3. Get all child trees in the above root trees (using $or + regex)
         children_cursor = self.db["categories"].find({
             "deleted_at": None,
             "$or": regex_conditions
         })
         children = await children_cursor.to_list(length=None)
 
-        # 4. Gộp root và cây con
+        # 4. Merge root and child trees
         all_nodes = roots + children
 
-        # 5. Xây dựng map id -> node và parent_id -> list con
+        # 5. Build map id -> node and parent_id -> list of children
         id_to_node = {}
         children_map = defaultdict(list)
 
@@ -94,7 +94,7 @@ class MongoCategoryRepository(CategoryRepository):
             if parent_id is not None:
                 children_map[str(parent_id)].append(node)
 
-        # 6. Đệ quy gán children cho mỗi node
+        # 6. Recursively assign children to each node
         def build_tree(node):
             node_id_str = str(node["_id"])
             node["children"] = [build_tree(child) for child in children_map.get(node_id_str, [])]

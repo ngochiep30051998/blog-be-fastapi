@@ -70,16 +70,16 @@ class MongoPostRepository(PostRepository):
 
     async def get_by_id(self, post_id: ObjectId) -> Optional[dict]:
         pipeline = [
-            {"$match": {"_id": ObjectId(post_id),"deleted_at": None}},  # tìm post theo id
+            {"$match": {"_id": ObjectId(post_id),"deleted_at": None}},
             {
                 "$lookup": {
-                    "from": "categories",            # tên collection categories
-                    "localField": "category_id",     # trường trong posts
-                    "foreignField": "_id",           # trường trong categories
-                    "as": "category"            # field trả về kèm
+                    "from": "categories",            
+                    "localField": "category_id",     
+                    "foreignField": "_id",           
+                    "as": "category"            
                 }
             },
-            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}}  # tách mảng thành object hoặc null
+            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}} 
         ]
 
         cursor = self.collection.aggregate(pipeline)

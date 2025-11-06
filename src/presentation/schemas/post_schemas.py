@@ -41,7 +41,7 @@ class PostResponse(BaseModel):
     author_name: Optional[str] = None
     status: str
     tags: List[str]
-    category: Optional[CategoryResponse] = None  # đổi category_id thành object
+    category: Optional[CategoryResponse] = None  # change category_id to object
     views_count: int
     likes_count: int
     # comments: List[CommentResponse] = []
@@ -58,7 +58,7 @@ class PostResponse(BaseModel):
             if 'slug' in values and not isinstance(values['slug'], str):
                 values['slug'] = str(values['slug'])
             if 'category' in values and values['category']:
-                # Convert ObjectId trong category
+                # Convert ObjectId in category
                 cat = values['category']
                 if '_id' in cat and isinstance(cat['_id'], ObjectId):
                     cat['_id'] = str(cat['_id'])

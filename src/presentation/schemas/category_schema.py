@@ -32,15 +32,15 @@ class CategoryResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     published_at: Optional[datetime] = None
-    children: List['CategoryResponse'] = []  # Thêm trường children đệ quy
+    children: List['CategoryResponse'] = []  # Add recursive children field
 
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
         if isinstance(values, dict):
-            # Đổi slug thành string nếu cần
+            # Convert slug to string if needed
             if 'slug' in values and not isinstance(values['slug'], str):
                 values['slug'] = str(values['slug'])
-            # ObjectId trong _id (nhờ alias, trường id sẽ nhận _id)
+            # ObjectId in _id (thanks to alias, id field will receive _id)
             if '_id' in values and isinstance(values['_id'], ObjectId):
                 values['_id'] = str(values['_id'])
             if 'parent_id' in values and isinstance(values['parent_id'], ObjectId):
@@ -53,5 +53,5 @@ class CategoryResponse(BaseModel):
             return Slug(value=v)
         return v
 
-# Để Pydantic nhận diện được đệ quy, gọi update_forward_refs sau định nghĩa
+# For Pydantic to recognize recursion, call update_forward_refs after definition
 CategoryResponse.model_rebuild()
