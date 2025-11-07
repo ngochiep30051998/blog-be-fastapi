@@ -33,6 +33,7 @@ class UserService:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
         to_encode.update({"exp": expire})
+        print(" to_encode:", to_encode)
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
     
@@ -59,7 +60,7 @@ class UserService:
         )
         saved_user = await self.user_repo.create_user(new_user)
 
-        access_token = self.create_access_token(data={"sub": str(saved_user["_id"])})
+        access_token = self.create_access_token(data={"sub": str(saved_user["_id"]), "role": saved_user["role"]})
 
         return access_token
     

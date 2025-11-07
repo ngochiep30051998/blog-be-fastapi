@@ -36,5 +36,5 @@ async def login_user(
     user = await service.authenticate_user(request.email, request.password)
     if not user:
         return BaseResponse[LoginResponse](success=False, message="Invalid email or password", data=None)
-    access_token = service.create_access_token(data={"sub": str(user["_id"])})
+    access_token = service.create_access_token(data={"sub": str(user["_id"]), "role": user["role"]})
     return BaseResponse[LoginResponse](success=True, data=LoginResponse(access_token=access_token, token_type="bearer"))

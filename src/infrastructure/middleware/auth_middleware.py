@@ -41,7 +41,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             user_id = payload.get("sub")
-            
             if user_id is None:
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
