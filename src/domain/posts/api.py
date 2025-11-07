@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query, status
+from fastapi import APIRouter, HTTPException, Depends, Query, status,Request
 from typing import List
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -7,13 +7,15 @@ from src.application.dto.base_dto import BaseResponse
 from src.application.dto.post_dto import PostCreateRequest, PostResponse
 from src.application.services.post_service import PostService
 from src.infrastructure.mongo.post_repository_impl import MongoPostRepository
+from src.infrastructure.mongo.user_repository_impl import MongoUserRepository
 from ...infrastructure.mongo.database import get_database
 router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 
 async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> PostService:
     """Dependency: Get post application service"""
     post_repo = MongoPostRepository(db)
-    return PostService(post_repo)
+    user_repo = MongoUserRepository(db)
+    return PostService(post_repo, user_repo)
 
 
 
@@ -36,21 +38,25 @@ async def get_posts(
     response_model=BaseResponse[PostResponse],
     status_code=status.HTTP_201_CREATED,
     summary="Create a new blog post",
-    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer","user"]))]  # Only admin and writer roles allowed
 )
 async def create_post(
-    request: PostCreateRequest,
+    post_data: PostCreateRequest,
+    request: Request,
     service: PostService = Depends(get_post_service)
 ):
     """Create a new blog post"""
+    # Access request information
+    user_id = request.state.user_id
     try:
         post = await service.create_post(
-            title=request.title,
-            content=request.content,
-            slug_str=request.slug,
-            excerpt=request.excerpt,
-            tags=request.tags,
-            category_id=request.category_id
+            title=post_data.title,
+            content=post_data.content,
+            slug_str=post_data.slug,
+            excerpt=post_data.excerpt,
+            tags=post_data.tags,
+            category_id=post_data.category_id,
+            user_id=user_id
         )
         return BaseResponse(success=True, data=post, message="Post created successfully")
     except ValueError as e:
@@ -98,11 +104,16 @@ async def get_post(
 )
 async def update_post(
     post_id: str,
-    request: PostCreateRequest,
+    post_data: PostCreateRequest,
+    request: Request,
     service: PostService = Depends(get_post_service)
 ):
     """Update a blog post"""
-    post = await service.update_post(post_id, request)
+    # Access request information if needed
+    client_ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    
+    post = await service.update_post(post_id, post_data)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return BaseResponse(success=True, data=post, message="Post updated successfully")

@@ -18,8 +18,6 @@ class PostCreateRequest(BaseModel):
     excerpt: Optional[str] = None
     tags: Optional[List[str]] = []
     category_id: Optional[str] = None
-    author_name: Optional[str] = None
-    author_email: Optional[str] = None
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
         if hasattr(values, 'category_id') and isinstance(values.category_id, ObjectId):

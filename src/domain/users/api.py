@@ -26,7 +26,6 @@ async def get_user_profile(
     Requires: Bearer token in Authorization header
     """
     user_id = request.state.user_id
-    print("Current User ID:", user_id)
     user = await service.get_by_id(user_id)
     if not user:
         return BaseResponse(success=False, message="User not found", data=None)
