@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query, status
 from typing import List
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from src.application.dependencies.role_checker import RoleChecker
 from src.application.dto.base_dto import BaseResponse
 from src.application.dto.post_dto import PostCreateRequest, PostResponse
 from src.application.services.post_service import PostService
@@ -15,8 +16,12 @@ async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> 
     return PostService(post_repo)
 
 
-    
-@router.get("", response_model=BaseResponse[List[PostResponse]], summary="Get all blog posts")
+
+@router.get("", 
+            response_model=BaseResponse[List[PostResponse]], 
+            summary="Get all blog posts", 
+            dependencies=[Depends(RoleChecker(allowed_roles=["*"]))]
+)
 async def get_posts(
     service: PostService = Depends(get_post_service),
     page: int = Query(1, ge=1, description="Page number"),
@@ -30,7 +35,8 @@ async def get_posts(
     "",
     response_model=BaseResponse[PostResponse],
     status_code=status.HTTP_201_CREATED,
-    summary="Create a new blog post"
+    summary="Create a new blog post",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
 )
 async def create_post(
     request: PostCreateRequest,
@@ -53,7 +59,8 @@ async def create_post(
 @router.delete(
     "/{post_id}",
     response_model=BaseResponse[bool],
-    summary="Delete a blog post"
+    summary="Delete a blog post",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
 )
 async def delete_post(
     post_id: str,
@@ -86,7 +93,8 @@ async def get_post(
 @router.put(
     "/{post_id}",
     response_model=BaseResponse[PostResponse],
-    summary="Update a blog post"
+    summary="Update a blog post",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
 )
 async def update_post(
     post_id: str,

@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from src.application.dependencies.role_checker import RoleChecker
 from src.application.dto.auth_dto import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse
 from src.application.dto.base_dto import BaseResponse
 from src.application.services.user_service import UserService
@@ -16,7 +17,11 @@ async def get_user_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> 
     user_repo = MongoUserRepository(db)
     return UserService(user_repo)
 
-@router.post("/register", summary="Register a new user", response_model=BaseResponse[RegisterResponse])
+@router.post("/register", 
+             summary="Register a new user", 
+             response_model=BaseResponse[RegisterResponse],
+             dependencies=[Depends(RoleChecker(allowed_roles=["admin"]))]  # Only admin role allowed
+             )
 async def register_user(
     request: RegisterRequest,
     service: UserService = Depends(get_user_service),

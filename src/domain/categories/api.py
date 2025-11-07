@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 
+from src.application.dependencies.role_checker import RoleChecker
 from src.application.dto.base_dto import BaseResponse
 from src.application.dto.category_dto import CategoryCreateRequest, CategoryResponse
 from src.application.services.category_service import CategoryService
@@ -17,7 +18,10 @@ async def get_category_service(db: AsyncIOMotorDatabase = Depends(get_database))
     category_repo = MongoCategoryRepository(db)
     return CategoryService(category_repo)
 
-@router.get("", response_model=BaseResponse[List[CategoryResponse]], summary="Get all blog categories")
+@router.get("", 
+            response_model=BaseResponse[List[CategoryResponse]], 
+            summary="Get all blog categories",
+            )
 async def get_categories(
     service: CategoryService = Depends(get_category_service),
     page: int = Query(1, ge=1, description="Page number"),
@@ -32,7 +36,8 @@ async def get_categories(
     "",
     response_model=BaseResponse[CategoryResponse],
     status_code=status.HTTP_201_CREATED,
-    summary="Create a new category"
+    summary="Create a new category",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
 )
 async def create_category(
     request: CategoryCreateRequest,
@@ -53,7 +58,8 @@ async def create_category(
 @router.delete(
     "/{category_id}",
     response_model=BaseResponse[bool],
-    summary="Delete a category"
+    summary="Delete a category",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
 )
 async def delete_category(
     category_id: str,
@@ -68,7 +74,8 @@ async def delete_category(
 @router.put(
     "/{category_id}",
     response_model=BaseResponse[CategoryResponse],
-    summary="Update a category"
+    summary="Update a category",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
 )
 async def update_category(
     category_id: str,
