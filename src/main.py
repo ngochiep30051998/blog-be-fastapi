@@ -15,11 +15,14 @@ from src.domain.users import api as usersApi
 from src.domain.files import api as fileApi
 from fastapi.openapi.utils import get_openapi
 
+from src.infrastructure.mongo.seeds.seed import seed_db
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown"""
     # Startup
     await MongoDatabase.connect_to_mongo()
+    await seed_db()
     yield
     # Shutdown
     await MongoDatabase.close_mongo_connection()

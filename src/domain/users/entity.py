@@ -14,7 +14,7 @@ class UserEntity(BaseModel):
     email: str
     password_hash: str
     role: UserRole
-    date_of_birth: Optional[str] = None
+    date_of_birth: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     deleted_at: Optional[datetime] = None

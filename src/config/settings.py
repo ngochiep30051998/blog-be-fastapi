@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str
     CLOUDINARY_CLOUD_FOLDER: str
     ALLOWED_MIME_TYPES: str = {"image/jpeg", "image/png", "image/gif"}
+    DEFAULT_USER_EMAIL: str
+    DEFAULT_USER_PASSWORD: str
+    DEFAULT_USER_FULL_NAME: str
+    DEFAULT_USER_ROLE: str
+    DEFAULT_USER_DATE_OF_BIRTH: str
+
     class Config:
         env_file = ".env"
 

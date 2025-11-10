@@ -56,7 +56,7 @@ class UserService:
             email=email,
             password_hash=hashed_password,
             role=role or UserRole.GUEST,
-            date_of_birth=date_of_birth,
+            date_of_birth=datetime.strptime(date_of_birth, "%Y-%m-%d"),
         )
         saved_user = await self.user_repo.create_user(new_user)
 
@@ -66,4 +66,7 @@ class UserService:
     
     async def get_by_id(self, user_id: str):
         user =  await self.user_repo.get_by_id(user_id)
+        return user
+    async def get_by_email(self, email: str):
+        user = await self.user_repo.get_by_email(email)
         return user
