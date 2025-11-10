@@ -35,7 +35,7 @@ class MongoSeeder:
         await self.seed_users(users)
         print("Seed users completed")
 
-# Hàm chạy seed (thường gọi trong event startup)
+# run seed (use event startup)
 async def seed_db():
     db = get_database()
     user_repo = MongoUserRepository(db)
