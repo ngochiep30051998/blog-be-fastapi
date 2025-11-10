@@ -45,7 +45,7 @@ class UserService:
             return False
         return user
     
-    async def register_user(self, full_name: str, email: str, password: str, date_of_birth=None):
+    async def register_user(self, full_name: str, email: str, password: str, date_of_birth=None, role: UserRole = None):
         existing_user = await self.user_repo.get_by_email(email)
         if existing_user:
             raise ValueError("Email already registered")
@@ -55,7 +55,7 @@ class UserService:
             full_name=full_name,
             email=email,
             password_hash=hashed_password,
-            role=UserRole.USER,
+            role=role or UserRole.GUEST,
             date_of_birth=date_of_birth,
         )
         saved_user = await self.user_repo.create_user(new_user)
