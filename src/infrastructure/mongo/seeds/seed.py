@@ -22,18 +22,19 @@ class MongoSeeder:
                                                   role=user["role"], date_of_birth=user["date_of_birth"])
 
     async def run(self):
-        users = [
-            {
-                "username": settings.DEFAULT_USER_FULL_NAME,
-                "email": settings.DEFAULT_USER_EMAIL,
-                "password": settings.DEFAULT_USER_PASSWORD,
-                "role": settings.DEFAULT_USER_ROLE,
-                "date_of_birth": settings.DEFAULT_USER_DATE_OF_BIRTH
-            }
-        ]
 
-        await self.seed_users(users)
-        print("Seed users completed")
+        if settings.ENABLE_SEED_DATA:
+            users = [
+                {
+                    "username": settings.DEFAULT_USER_FULL_NAME,
+                    "email": settings.DEFAULT_USER_EMAIL,
+                    "password": settings.DEFAULT_USER_PASSWORD,
+                    "role": settings.DEFAULT_USER_ROLE,
+                    "date_of_birth": settings.DEFAULT_USER_DATE_OF_BIRTH
+                }
+            ]   
+            await self.seed_users(users)
+            print("Seed users completed")
 
 # run seed (use event startup)
 async def seed_db():

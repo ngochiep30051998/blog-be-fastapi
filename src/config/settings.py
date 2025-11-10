@@ -1,7 +1,7 @@
 # src/config/settings.py
 
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     DEFAULT_USER_FULL_NAME: str
     DEFAULT_USER_ROLE: str
     DEFAULT_USER_DATE_OF_BIRTH: str
-
+    ENABLE_SEED_DATA: Optional[bool] = False
     class Config:
         env_file = ".env"
 
