@@ -27,9 +27,8 @@ async def register_user(
     service: UserService = Depends(get_user_service),
 ):
     """Register a new user"""
-    access_token = await service.register_user(request.full_name, request.email, request.password, request.date_of_birth)
+    access_token = await service.register_user(request.full_name, request.email, request.password, request.date_of_birth, request.role)
     res = RegisterResponse(access_token=access_token, token_type="bearer")
-    print("Register a new user", res)
     return BaseResponse(success=True, data=res)
 
 @router.post("/login", summary="User login", response_model=BaseResponse[LoginResponse])

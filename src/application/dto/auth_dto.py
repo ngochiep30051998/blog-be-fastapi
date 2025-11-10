@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
 from src.application.dto.user_dto import UserResponse
+from src.core.role import UserRole
 from src.core.value_objects.email import Email
 
 
@@ -17,6 +18,7 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     date_of_birth: str | None = None
+    role: UserRole | None = None
 class RegisterResponse(BaseModel):
     access_token: str
     token_type: str
