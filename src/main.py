@@ -12,6 +12,7 @@ from src.domain.posts import api as postApi
 from src.domain.categories import api as categoriesApi
 from src.domain.auth import api as authApi
 from src.domain.users import api as usersApi
+from src.domain.files import api as fileApi
 from fastapi.openapi.utils import get_openapi
 
 @asynccontextmanager
@@ -82,6 +83,7 @@ app.include_router(postApi.router)
 app.include_router(categoriesApi.router)
 app.include_router(authApi.router)
 app.include_router(usersApi.router)
+app.include_router(fileApi.router)
 
 @app.get("/", tags=["health"])
 async def root():

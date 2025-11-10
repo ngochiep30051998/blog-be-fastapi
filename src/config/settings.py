@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     PUBLIC_ROUTES: List[str] = []
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
+    CLOUDINARY_CLOUD_FOLDER: str
+    ALLOWED_MIME_TYPES: str = {"image/jpeg", "image/png", "image/gif"}
     class Config:
         env_file = ".env"
 
