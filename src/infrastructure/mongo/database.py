@@ -15,7 +15,6 @@ class MongoDatabase:
         """Connect to MongoDB"""
         cls.client = AsyncIOMotorClient(settings.MONGODB_URL)
         cls.db = cls.client[settings.MONGODB_DB_NAME]
-        print(f"Connected to MongoDB {settings.MONGODB_URL}")
         # Create indexes
         await cls._create_indexes()
     
@@ -38,7 +37,7 @@ class MongoDatabase:
         # await posts_collection.create_index("author_id")
         
         # Other collections
-        # await cls.db["tags"].create_index("slug", unique=True)
+        await cls.db["categories"].create_index("slug", unique=True)
         # await cls.db["authors"].create_index("email", unique=True)
         # await cls.db["authors"].create_index("username", unique=True)
 
