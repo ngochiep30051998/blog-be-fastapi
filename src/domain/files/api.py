@@ -41,6 +41,10 @@ async def delete_file(
     file_id: str,
     file_service: FileService = Depends(get_file_service)
 ):
+    file = await file_service.get_file(file_id)
+    if not file:
+        return BaseResponse(success=False, message="File not found")
+    await cloudinary.uploader.destroy(file['cloudinary_id'])
     await file_service.delete_file(file_id)
     return BaseResponse(success=True, data={"message": "File deleted successfully"})
 @router.get("/list", summary="list files", response_model=BaseResponse[List[FileResponse]])

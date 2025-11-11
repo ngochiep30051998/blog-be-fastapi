@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi.params import Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -6,6 +6,7 @@ from src.application.dependencies.role_checker import RoleChecker
 from src.application.dto.auth_dto import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse
 from src.application.dto.base_dto import BaseResponse
 from src.application.services.user_service import UserService
+from src.config import settings
 from src.infrastructure.mongo.database import get_database
 from src.infrastructure.mongo.user_repository_impl import MongoUserRepository
 
@@ -33,7 +34,10 @@ async def register_user(
 
 @router.post("/login", summary="User login", response_model=BaseResponse[LoginResponse])
 async def login_user(
-    request: LoginRequest,
+    request: LoginRequest = Body(..., example={
+                        "email": settings.ENVIRONMENT == "development" and settings.DEFAULT_USER_EMAIL or "user@example.com",
+                        "password": settings.ENVIRONMENT == "development" and settings.DEFAULT_USER_PASSWORD or "password"
+    }),
     service: UserService = Depends(get_user_service)
 ):
     """User login"""

@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     REDIS_DB: int
     REDIS_PASSWORD: Optional[str] = None
     ENABLE_RATE_LIMITING: Optional[bool] = True
+    ENVIRONMENT: Optional[str] = None  # Added environment setting
     class Config:
         env_file = ".env"
 
