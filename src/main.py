@@ -16,6 +16,8 @@ from src.domain.files import api as fileApi
 from fastapi.openapi.utils import get_openapi
 
 from src.infrastructure.mongo.seeds.seed import seed_db
+from src.infrastructure.middleware.rate_limiter import AsyncRedisRateLimiter
+from src.infrastructure.cache.redis import redis_client
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,6 +45,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add rate limiting middleware only if enabled
+if settings.ENABLE_RATE_LIMITING:
+    app.add_middleware(
+        AsyncRedisRateLimiter,
+        redis_client=redis_client,
+        limit=40,      # max 40 requests
+        window=60      # per 60 seconds
+    )
 # Custom OpenAPI schema to show button Authorize
 def custom_openapi():
     if app.openapi_schema:
