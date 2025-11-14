@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str
     LOG_LEVEL: str
     DEBUG: bool
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080","http://localhost:4200"]
     APP_PORT: int = 8000
     SECRET_KEY: str
     ALGORITHM: str

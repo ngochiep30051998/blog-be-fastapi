@@ -10,6 +10,12 @@ from src.config import settings
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # Allow CORS preflight requests to pass through without auth
+        # Browsers send HTTP OPTIONS requests as CORS preflight; these
+        # must not be rejected with 401 since they contain no Authorization header.
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         # Skip authentication for public routes
         if request.url.path in settings.PUBLIC_ROUTES:
             return await call_next(request)
