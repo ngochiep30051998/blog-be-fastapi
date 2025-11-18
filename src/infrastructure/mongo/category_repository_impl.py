@@ -44,8 +44,63 @@ class MongoCategoryRepository(CategoryRepository):
         return category_data
 
     async def get_by_id(self, category_id):
-        result = await self.collection.find_one({"_id": ObjectId(category_id)})
+        result = await self.collection.find_one({"_id": ObjectId(category_id), "deleted_at": None})
         return result
+    
+    async def get_category_with_children(self, category_id: str):
+        """Get a category by ID with all its children categories"""
+        # 1. Get the category by ID
+        category = await self.collection.find_one({
+            "_id": ObjectId(category_id),
+            "deleted_at": None
+        })
+        
+        if not category:
+            return None
+        
+        category_id_str = str(category["_id"])
+        category_path = category.get("path", "")
+        
+        # 2. Build regex to find all children based on path
+        # Children will have path starting with category_path + "/" + category_id
+        if category_path:
+            # If category has a path, children will have path starting with category_path + "/" + category_id
+            children_path_pattern = f"^{category_path}/{category_id_str}"
+        else:
+            # If category is root (empty path), children will have path starting with /category_id
+            children_path_pattern = f"^/{category_id_str}"
+        
+        # 3. Get all child categories
+        children_cursor = self.collection.find({
+            "deleted_at": None,
+            "path": {"$regex": children_path_pattern}
+        })
+        children = await children_cursor.to_list(length=None)
+        
+        # 4. Merge category and its children
+        all_nodes = [category] + children
+        
+        # 5. Build map id -> node and parent_id -> list of children
+        id_to_node = {}
+        children_map = defaultdict(list)
+        
+        for node in all_nodes:
+            node_id_str = str(node["_id"])
+            id_to_node[node_id_str] = node
+            parent_id = node.get("parent_id")
+            if parent_id is not None:
+                children_map[str(parent_id)].append(node)
+        
+        # 6. Recursively assign children to each node
+        def build_tree(node):
+            node_id_str = str(node["_id"])
+            node["children"] = [build_tree(child) for child in children_map.get(node_id_str, [])]
+            return node
+        
+        # Build tree starting from the requested category
+        tree = build_tree(category)
+        
+        return tree
 
     async def update_category(self, category_id, category_data):
         await self.collection.update_one({"_id": ObjectId(category_id)}, {"$set": category_data})

@@ -44,5 +44,5 @@ class CategoryService:
         updated_category = await self.category_repo.update_category(category_id, update_data)
         return updated_category
     async def get_category_by_id(self, category_id: str):
-        category = await self.category_repo.get_by_id(category_id)
+        category = await self.category_repo.get_category_with_children(category_id)
         return category
