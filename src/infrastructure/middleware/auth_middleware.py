@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import List
 
 from src.config import settings
+from src.infrastructure.middleware.cors_utils import add_cors_headers
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -24,52 +25,58 @@ class AuthMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization")
         
         if not auth_header:
-            return JSONResponse(
+            response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Authorization header missing"}
             )
+            return add_cors_headers(response, request)
         
         # Check Bearer scheme
         try:
             scheme, token = auth_header.split()
             if scheme.lower() != "bearer":
-                return JSONResponse(
+                response = JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"detail": "Invalid authentication scheme"}
                 )
+                return add_cors_headers(response, request)
         except ValueError:
-            return JSONResponse(
+            response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Invalid Authorization header format"}
             )
+            return add_cors_headers(response, request)
         
         # Verify JWT token
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             user_id = payload.get("sub")
             if user_id is None:
-                return JSONResponse(
+                response = JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"detail": "Invalid token payload"}
                 )
+                return add_cors_headers(response, request)
             
             # Check token expiration
             exp = payload.get("exp")
             if exp and datetime.fromtimestamp(exp) < datetime.now():
-                return JSONResponse(
+                response = JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"detail": "Token has expired"}
                 )
+                return add_cors_headers(response, request)
             
             # Add user info to request state
             request.state.user_id = user_id
             request.state.user_payload = payload
             
         except JWTError as e:
-            return JSONResponse(
+            response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": f"Invalid token: {str(e)}"}
             )
+            return add_cors_headers(response, request)
         
         # Proceed to the route handler
         response = await call_next(request)
