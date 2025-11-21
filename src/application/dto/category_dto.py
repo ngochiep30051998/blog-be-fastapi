@@ -17,6 +17,17 @@ class CategoryCreateRequest(BaseModel):
     parent_id: Optional[str] = None
     slug: Optional[str] = None
 
+class CategoryUpdateRequest(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True,
+        json_encoders={ObjectId: str},
+    )
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = None
+    parent_id: Optional[str] = None
+    slug: Optional[str] = None
+
 class CategoryResponse(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,

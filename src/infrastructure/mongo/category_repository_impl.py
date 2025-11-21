@@ -103,8 +103,11 @@ class MongoCategoryRepository(CategoryRepository):
         return tree
 
     async def update_category(self, category_id, category_data):
+        # Update the document
         await self.collection.update_one({"_id": ObjectId(category_id)}, {"$set": category_data})
-        return category_data
+        # Fetch and return the complete updated document
+        updated_document = await self.collection.find_one({"_id": ObjectId(category_id), "deleted_at": None})
+        return updated_document
 
     async def delete(self, id):
         result = await self.collection.update_one({"_id": ObjectId(id)}, {"$set": {"deleted_at": datetime.now(timezone.utc)}})

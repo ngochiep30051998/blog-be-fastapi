@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query, status
 
 from src.application.dependencies.role_checker import RoleChecker
 from src.application.dto.base_dto import BaseResponse
-from src.application.dto.category_dto import CategoryCreateRequest, CategoryResponse
+from src.application.dto.category_dto import CategoryCreateRequest, CategoryUpdateRequest, CategoryResponse
 from src.application.services.category_service import CategoryService
 from src.infrastructure.mongo.category_repository_impl import MongoCategoryRepository
 
@@ -71,7 +71,7 @@ async def delete_category(
         raise HTTPException(status_code=404, detail="Category not found")
     return BaseResponse(success=True, message="Category deleted successfully", data=deleted)
 
-@router.put(
+@router.patch(
     "/{category_id}",
     response_model=BaseResponse[CategoryResponse],
     summary="Update a category",
@@ -79,10 +79,10 @@ async def delete_category(
 )
 async def update_category(
     category_id: str,
-    request: CategoryCreateRequest,
+    request: CategoryUpdateRequest,
     service: CategoryService = Depends(get_category_service),
 ):
-    """Update a category"""
+    """Update a category (partial update)"""
     try:
         updated_category = await service.update_category(
             category_id=category_id,

@@ -31,6 +31,7 @@ class CategoryService:
         deleted = await self.category_repo.delete(category_id)
         return deleted
     async def update_category(self, category_id: str, name: str = None, description: str = None, slug_str: str = None, parent_id: str = None):
+        from datetime import datetime, timezone
         update_data = {}
         if name is not None:
             update_data["name"] = name
@@ -40,6 +41,9 @@ class CategoryService:
             update_data["slug"] = str(Slug(slug_str))
         if parent_id is not None:
             update_data["parent_id"] = ObjectId(parent_id)
+        
+        # Always update the updated_at timestamp
+        update_data["updated_at"] = datetime.now(timezone.utc)
 
         updated_category = await self.category_repo.update_category(category_id, update_data)
         return updated_category
