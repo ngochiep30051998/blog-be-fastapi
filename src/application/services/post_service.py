@@ -45,8 +45,60 @@ class PostService:
         return await self.post_repo.get_by_id(post_id)
     
     async def update_post(self, post_id, post_data):
-        return await self.post_repo.update_post(post_id, post_data)
+        # Convert Pydantic model to dict, excluding None values for partial updates
+        update_dict = post_data.model_dump(exclude_none=True)
+        
+        # Convert ObjectId string to ObjectId for category_id if present
+        if 'category_id' in update_dict and update_dict['category_id']:
+            update_dict['category_id'] = ObjectId(update_dict['category_id'])
+        
+        # Update updated_at timestamp
+        from datetime import datetime, timezone
+        update_dict['updated_at'] = datetime.now(timezone.utc)
+        
+        return await self.post_repo.update_post(ObjectId(post_id), update_dict)
     
     async def delete_post(self, post_id)-> bool: 
         return await self.post_repo.delete(post_id)
+    
+    async def publish_post(self, post_id: str):
+        """Publish a post by setting status to PUBLISHED and setting published_at timestamp"""
+        from datetime import datetime, timezone
+        
+        # Check if post exists
+        post = await self.get_by_id(post_id)
+        if not post:
+            return None
+        
+        # Prepare update data
+        update_dict = {
+            'status': PostStatus.PUBLISHED.value,
+            'updated_at': datetime.now(timezone.utc)
+        }
+        
+        # Only set published_at if it's not already set (first time publishing)
+        if not post.get('published_at'):
+            update_dict['published_at'] = datetime.now(timezone.utc)
+        
+        return await self.post_repo.update_post(ObjectId(post_id), update_dict)
+    
+    async def unpublish_post(self, post_id: str):
+        """Unpublish a post by setting status back to DRAFT"""
+        from datetime import datetime, timezone
+        
+        # Check if post exists
+        post = await self.get_by_id(post_id)
+        if not post:
+            return None
+        
+        # Prepare update data - set status to DRAFT
+        update_dict = {
+            'status': PostStatus.DRAFT.value,
+            'updated_at': datetime.now(timezone.utc),
+            'published_at': None
+        }
+        
+        # Note: We keep published_at timestamp for historical purposes
+        
+        return await self.post_repo.update_post(ObjectId(post_id), update_dict)
     

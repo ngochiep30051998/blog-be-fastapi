@@ -4,7 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from src.application.dependencies.role_checker import RoleChecker
 from src.application.dto.base_dto import BaseResponse
-from src.application.dto.post_dto import PostCreateRequest, PostResponse
+from src.application.dto.post_dto import PostCreateRequest, PostUpdateRequest, PostResponse
 from src.application.services.post_service import PostService
 from src.infrastructure.mongo.post_repository_impl import MongoPostRepository
 from src.infrastructure.mongo.user_repository_impl import MongoUserRepository
@@ -96,7 +96,7 @@ async def get_post(
         raise HTTPException(status_code=404, detail="Post not found")
     return BaseResponse(success=True, data=post, message="Post retrieved successfully")
 
-@router.put(
+@router.patch(
     "/{post_id}",
     response_model=BaseResponse[PostResponse],
     summary="Update a blog post",
@@ -104,11 +104,11 @@ async def get_post(
 )
 async def update_post(
     post_id: str,
-    post_data: PostCreateRequest,
+    post_data: PostUpdateRequest,
     request: Request,
     service: PostService = Depends(get_post_service)
 ):
-    """Update a blog post"""
+    """Update a blog post (partial update)"""
     # Access request information if needed
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
@@ -117,3 +117,35 @@ async def update_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return BaseResponse(success=True, data=post, message="Post updated successfully")
+
+@router.patch(
+    "/{post_id}/publish",
+    response_model=BaseResponse[PostResponse],
+    summary="Publish a blog post",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
+)
+async def publish_post(
+    post_id: str,
+    service: PostService = Depends(get_post_service)
+):
+    """Publish a blog post (change status to published)"""
+    post = await service.publish_post(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return BaseResponse(success=True, data=post, message="Post published successfully")
+
+@router.patch(
+    "/{post_id}/unpublish",
+    response_model=BaseResponse[PostResponse],
+    summary="Unpublish a blog post",
+    dependencies=[Depends(RoleChecker(allowed_roles=["admin", "writer"]))]  # Only admin and writer roles allowed
+)
+async def unpublish_post(
+    post_id: str,
+    service: PostService = Depends(get_post_service)
+):
+    """Unpublish a blog post (change status back to draft)"""
+    post = await service.unpublish_post(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return BaseResponse(success=True, data=post, message="Post unpublished successfully")

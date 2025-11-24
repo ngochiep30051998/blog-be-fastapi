@@ -25,6 +25,26 @@ class PostCreateRequest(BaseModel):
         return values
 
 
+class PostUpdateRequest(BaseModel):
+    """DTO for partial post updates (PATCH) - all fields are optional"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True,
+        json_encoders={ObjectId: str},
+    )
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    content: Optional[str] = Field(None, min_length=1)
+    slug: Optional[str] = Field(None, pattern=r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    excerpt: Optional[str] = None
+    tags: Optional[List[str]] = None
+    category_id: Optional[str] = None
+    @model_validator(mode="before")
+    def convert_objectid(cls, values: Any) -> Any:
+        if hasattr(values, 'category_id') and isinstance(values.category_id, ObjectId):
+            values.category_id = str(values.category_id)
+        return values
+
+
 class PostResponse(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
