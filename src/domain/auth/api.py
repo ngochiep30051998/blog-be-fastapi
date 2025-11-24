@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Request
 from fastapi.params import Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -40,9 +40,30 @@ async def login_user(
     }),
     service: UserService = Depends(get_user_service)
 ):
-    """User login"""
-    user = await service.authenticate_user(request.email, request.password)
-    if not user:
+    """User login - creates a new session and invalidates any existing session"""
+    access_token = await service.login_user(request.email, request.password)
+    if not access_token:
         return BaseResponse[LoginResponse](success=False, message="Invalid email or password", data=None)
-    access_token = service.create_access_token(data={"sub": str(user["_id"]), "role": user["role"]})
     return BaseResponse[LoginResponse](success=True, data=LoginResponse(access_token=access_token, token_type="bearer"))
+
+@router.post("/logout", summary="User logout", response_model=BaseResponse[dict])
+async def logout_user(
+    request: Request,
+    service: UserService = Depends(get_user_service)
+):
+    """User logout - invalidates the current session token"""
+    # Get token from Authorization header
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return BaseResponse(success=False, message="Authorization header missing", data=None)
+    
+    try:
+        scheme, token = auth_header.split()
+        if scheme.lower() != "bearer":
+            return BaseResponse(success=False, message="Invalid authentication scheme", data=None)
+        
+        # Invalidate the token
+        await service.session_service.invalidate_token(token)
+        return BaseResponse(success=True, message="Logged out successfully", data={})
+    except ValueError:
+        return BaseResponse(success=False, message="Invalid Authorization header format", data=None)

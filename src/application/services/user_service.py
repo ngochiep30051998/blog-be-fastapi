@@ -8,12 +8,14 @@ from src.config import settings
 from src.core.role import UserRole
 from src.domain.users.entity import UserEntity
 from src.infrastructure.mongo.user_repository_impl import MongoUserRepository
+from src.application.services.session_service import SessionService
 import bcrypt
 import jwt
 
 class UserService:
-    def __init__(self, user_repo: MongoUserRepository):
+    def __init__(self, user_repo: MongoUserRepository, session_service: Optional[SessionService] = None):
         self.user_repo = user_repo
+        self.session_service = session_service or SessionService()
         
     def hash_password(self, plain_password: str) -> str:
         # First convert to SHA256 to handle long passwords and ensure consistent length
@@ -61,7 +63,37 @@ class UserService:
         saved_user = await self.user_repo.create_user(new_user)
 
         access_token = self.create_access_token(data={"sub": str(saved_user["_id"]), "role": saved_user["role"]})
+        
+        # Store session in Redis (this will invalidate any existing session)
+        user_id = str(saved_user["_id"])
+        expires_in_seconds = self.session_service.get_token_expiration_seconds(access_token)
+        await self.session_service.store_session(user_id, access_token, expires_in_seconds)
 
+        return access_token
+    
+    async def login_user(self, email: str, password: str) -> Optional[str]:
+        """
+        Authenticate user and create a new session token.
+        This will invalidate any existing session for the user.
+        
+        Returns:
+            JWT token if authentication succeeds, None otherwise
+        """
+        user = await self.authenticate_user(email, password)
+        if not user:
+            return None
+        
+        user_id = str(user["_id"])
+        # Invalidate any existing session before creating new one
+        await self.session_service.invalidate_session(user_id)
+        
+        # Create new token
+        access_token = self.create_access_token(data={"sub": user_id, "role": user["role"]})
+        
+        # Store session in Redis
+        expires_in_seconds = self.session_service.get_token_expiration_seconds(access_token)
+        await self.session_service.store_session(user_id, access_token, expires_in_seconds)
+        
         return access_token
     
     async def get_by_id(self, user_id: str):

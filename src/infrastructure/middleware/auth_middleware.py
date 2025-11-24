@@ -7,9 +7,14 @@ from typing import List
 
 from src.config import settings
 from src.infrastructure.middleware.cors_utils import add_cors_headers
+from src.application.services.session_service import SessionService
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+        self.session_service = SessionService()
+    
     async def dispatch(self, request: Request, call_next):
         # Allow CORS preflight requests to pass through without auth
         # Browsers send HTTP OPTIONS requests as CORS preflight; these
@@ -64,6 +69,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 response = JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"detail": "Token has expired"}
+                )
+                return add_cors_headers(response, request)
+            
+            # Check if token exists in Redis (session validation)
+            is_valid = await self.session_service.is_token_valid(token)
+            if not is_valid:
+                response = JSONResponse(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    content={"detail": "Token has been invalidated or session expired"}
                 )
                 return add_cors_headers(response, request)
             
