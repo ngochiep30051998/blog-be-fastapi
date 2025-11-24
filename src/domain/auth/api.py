@@ -41,10 +41,13 @@ async def login_user(
     service: UserService = Depends(get_user_service)
 ):
     """User login - creates a new session and invalidates any existing session"""
-    access_token = await service.login_user(request.email, request.password)
-    if not access_token:
-        return BaseResponse[LoginResponse](success=False, message="Invalid email or password", data=None)
-    return BaseResponse[LoginResponse](success=True, data=LoginResponse(access_token=access_token, token_type="bearer"))
+    try:
+        access_token = await service.login_user(request.email, request.password)
+        if not access_token:
+            return BaseResponse[LoginResponse](success=False, message="Invalid email or password", data=None)
+        return BaseResponse[LoginResponse](success=True, data=LoginResponse(access_token=access_token, token_type="bearer"))
+    except ValueError as e:
+        return BaseResponse[LoginResponse](success=False, message=str(e), data=None)
 
 @router.post("/logout", summary="User logout", response_model=BaseResponse[dict])
 async def logout_user(

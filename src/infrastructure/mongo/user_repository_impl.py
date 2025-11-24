@@ -39,12 +39,20 @@ class MongoUserRepository(UserRepository):
         return result.modified_count > 0
     
     async def update_user(self, user_id, user_data):
-        await self.collection.update_one({"_id": user_id}, {"$set": user_data})
-        return user_data
+        result = await self.collection.update_one({"_id": user_id}, {"$set": user_data})
+        if result.modified_count > 0:
+            updated_user = await self.collection.find_one({"_id": user_id})
+            if updated_user:
+                updated_user.pop("password_hash", None)
+            return updated_user
+        return None
     
     async def list_users(self, skip: int = 0, limit: int = 10):
         cursor = self.collection.find({"deleted_at": None}).skip(skip).limit(limit)
         users = await cursor.to_list(length=limit)
+        # Remove password_hash from each user
+        for user in users:
+            user.pop("password_hash", None)
         return users
     async def get_by_id(self, user_id: str) -> UserEntity:
         result = await self.collection.find_one({"_id": ObjectId(user_id), "deleted_at": None})

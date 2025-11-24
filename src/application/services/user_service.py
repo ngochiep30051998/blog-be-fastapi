@@ -78,10 +78,17 @@ class UserService:
         
         Returns:
             JWT token if authentication succeeds, None otherwise
+        
+        Raises:
+            ValueError: If user is locked
         """
         user = await self.authenticate_user(email, password)
         if not user:
             return None
+        
+        # Check if user is locked
+        if user.get("locked", False):
+            raise ValueError("User account is locked. Please contact an administrator.")
         
         user_id = str(user["_id"])
         # Invalidate any existing session before creating new one
@@ -102,3 +109,75 @@ class UserService:
     async def get_by_email(self, email: str):
         user = await self.user_repo.get_by_email(email)
         return user
+    
+    async def list_users(self, skip: int = 0, limit: int = 10):
+        """List all users (excluding password_hash)"""
+        users = await self.user_repo.list_users(skip, limit)
+        return users
+    
+    async def update_user(self, user_id: str, update_data: dict):
+        """Update user information"""
+        # Remove None values
+        update_data = {k: v for k, v in update_data.items() if v is not None}
+        if not update_data:
+            raise ValueError("No fields to update")
+        
+        # Add updated_at timestamp
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        
+        # Update user and get updated user (password_hash already removed by repository)
+        updated_user = await self.user_repo.update_user(ObjectId(user_id), update_data)
+        if not updated_user:
+            raise ValueError("User not found or update failed")
+        return updated_user
+    
+    async def lock_user(self, user_id: str, locked: bool):
+        """Lock or unlock a user"""
+        update_data = {
+            "locked": locked,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        # Update user and get updated user (password_hash already removed by repository)
+        updated_user = await self.user_repo.update_user(ObjectId(user_id), update_data)
+        if not updated_user:
+            raise ValueError("User not found or update failed")
+        return updated_user
+    
+    async def change_password(self, user_id: str, old_password: str, new_password: str):
+        """
+        Change user password
+        Verifies old password before setting new password
+        
+        Raises:
+            ValueError: If user not found, old password is incorrect, or user is locked
+        """
+        # Get user with password_hash
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+        
+        # Check if user is locked
+        if user.get("locked", False):
+            raise ValueError("User account is locked. Please contact an administrator.")
+        
+        # Verify old password
+        if not self.verify_password(old_password, user.get('password_hash')):
+            raise ValueError("Old password is incorrect")
+        
+        # Hash new password
+        new_password_hash = self.hash_password(new_password)
+        
+        # Update password
+        update_data = {
+            "password_hash": new_password_hash,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        updated_user = await self.user_repo.update_user(ObjectId(user_id), update_data)
+        if not updated_user:
+            raise ValueError("Failed to update password")
+        
+        # Invalidate all existing sessions for security (force re-login)
+        await self.session_service.invalidate_session(user_id)
+        
+        return updated_user
