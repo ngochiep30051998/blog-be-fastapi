@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Request
+from fastapi import APIRouter, Body, Request, HTTPException, status
 from fastapi.params import Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -44,10 +44,17 @@ async def login_user(
     try:
         access_token = await service.login_user(request.email, request.password)
         if not access_token:
-            return BaseResponse[LoginResponse](success=False, message="Invalid email or password", data=None)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
         return BaseResponse[LoginResponse](success=True, data=LoginResponse(access_token=access_token, token_type="bearer"))
     except ValueError as e:
-        return BaseResponse[LoginResponse](success=False, message=str(e), data=None)
+        # User is locked - raise 401 Unauthorized
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e)
+        )
 
 @router.post("/logout", summary="User logout", response_model=BaseResponse[dict])
 async def logout_user(
