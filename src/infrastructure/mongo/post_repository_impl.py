@@ -55,6 +55,22 @@ class MongoPostRepository(PostRepository):
             "category_id": post.category_id,
             "views_count": post.views_count,
             "likes_count": post.likes_count,
+            "thumbnail": post.thumbnail,
+            "banner": post.banner,
+            # SEO fields
+            "meta_title": post.meta_title,
+            "meta_description": post.meta_description,
+            "meta_keywords": post.meta_keywords,
+            "meta_robots": post.meta_robots,
+            "og_title": post.og_title,
+            "og_description": post.og_description,
+            "og_image": post.og_image,
+            "og_type": post.og_type,
+            "twitter_card": post.twitter_card,
+            "twitter_title": post.twitter_title,
+            "twitter_description": post.twitter_description,
+            "twitter_image": post.twitter_image,
+            "canonical_url": post.canonical_url,
             # "comments": [
             #     {
             #         "_id": c.id,

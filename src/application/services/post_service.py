@@ -139,7 +139,21 @@ class PostService:
                           category_id: str = None,
                           user_id: str = None,
                           thumbnail: str = None,
-                          banner: str = None
+                          banner: str = None,
+                          # SEO fields
+                          meta_title: str = None,
+                          meta_description: str = None,
+                          meta_keywords: list = None,
+                          meta_robots: str = None,
+                          og_title: str = None,
+                          og_description: str = None,
+                          og_image: str = None,
+                          og_type: str = None,
+                          twitter_card: str = None,
+                          twitter_title: str = None,
+                          twitter_description: str = None,
+                          twitter_image: str = None,
+                          canonical_url: str = None
                           ):
         # Handle tags: process TagInput objects and get their IDs, names, and slugs
         tag_ids = []
@@ -200,7 +214,21 @@ class PostService:
             author_name=author.get("full_name") if author else "Unknown",
             author_email=author.get("email") if author else "Unknown",
             thumbnail=thumbnail,
-            banner=banner
+            banner=banner,
+            # SEO fields
+            meta_title=meta_title,
+            meta_description=meta_description,
+            meta_keywords=meta_keywords or [],
+            meta_robots=meta_robots,
+            og_title=og_title,
+            og_description=og_description,
+            og_image=og_image,
+            og_type=og_type,
+            twitter_card=twitter_card,
+            twitter_title=twitter_title,
+            twitter_description=twitter_description,
+            twitter_image=twitter_image,
+            canonical_url=canonical_url
         )
         saved_post = await self.post_repo.create_post(post)
         return saved_post
@@ -251,6 +279,11 @@ class PostService:
         # Convert ObjectId string to ObjectId for category_id if present
         if 'category_id' in update_dict and update_dict['category_id']:
             update_dict['category_id'] = ObjectId(update_dict['category_id'])
+        
+        # Handle SEO fields - ensure meta_keywords is a list if provided
+        if 'meta_keywords' in update_dict and update_dict['meta_keywords'] is not None:
+            if not isinstance(update_dict['meta_keywords'], list):
+                update_dict['meta_keywords'] = []
         
         # Update updated_at timestamp
         from datetime import datetime, timezone

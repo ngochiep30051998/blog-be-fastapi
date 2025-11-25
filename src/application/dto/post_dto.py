@@ -41,6 +41,20 @@ class PostCreateRequest(BaseModel):
     category_id: Optional[str] = None
     thumbnail: Optional[str] = None
     banner: Optional[str] = None
+    # SEO fields
+    meta_title: Optional[str] = Field(None, max_length=60, description="Meta title for SEO (recommended: 50-60 characters)")
+    meta_description: Optional[str] = Field(None, max_length=160, description="Meta description for SEO (recommended: 150-160 characters)")
+    meta_keywords: Optional[List[str]] = Field(None, description="Meta keywords for SEO")
+    meta_robots: Optional[str] = Field(None, description="Meta robots directive (e.g., 'index, follow', 'noindex, nofollow')")
+    og_title: Optional[str] = Field(None, description="Open Graph title for social media sharing")
+    og_description: Optional[str] = Field(None, description="Open Graph description for social media sharing")
+    og_image: Optional[str] = Field(None, description="Open Graph image URL for social media sharing")
+    og_type: Optional[str] = Field(None, description="Open Graph type (e.g., 'article', 'website')")
+    twitter_card: Optional[str] = Field(None, description="Twitter card type (e.g., 'summary_large_image', 'summary')")
+    twitter_title: Optional[str] = Field(None, description="Twitter title for social media sharing")
+    twitter_description: Optional[str] = Field(None, description="Twitter description for social media sharing")
+    twitter_image: Optional[str] = Field(None, description="Twitter image URL for social media sharing")
+    canonical_url: Optional[str] = Field(None, description="Canonical URL for SEO")
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
         if hasattr(values, 'category_id') and isinstance(values.category_id, ObjectId):
@@ -63,6 +77,20 @@ class PostUpdateRequest(BaseModel):
     category_id: Optional[str] = None
     thumbnail: Optional[str] = None
     banner: Optional[str] = None
+    # SEO fields
+    meta_title: Optional[str] = Field(None, max_length=60, description="Meta title for SEO (recommended: 50-60 characters)")
+    meta_description: Optional[str] = Field(None, max_length=160, description="Meta description for SEO (recommended: 150-160 characters)")
+    meta_keywords: Optional[List[str]] = Field(None, description="Meta keywords for SEO")
+    meta_robots: Optional[str] = Field(None, description="Meta robots directive (e.g., 'index, follow', 'noindex, nofollow')")
+    og_title: Optional[str] = Field(None, description="Open Graph title for social media sharing")
+    og_description: Optional[str] = Field(None, description="Open Graph description for social media sharing")
+    og_image: Optional[str] = Field(None, description="Open Graph image URL for social media sharing")
+    og_type: Optional[str] = Field(None, description="Open Graph type (e.g., 'article', 'website')")
+    twitter_card: Optional[str] = Field(None, description="Twitter card type (e.g., 'summary_large_image', 'summary')")
+    twitter_title: Optional[str] = Field(None, description="Twitter title for social media sharing")
+    twitter_description: Optional[str] = Field(None, description="Twitter description for social media sharing")
+    twitter_image: Optional[str] = Field(None, description="Twitter image URL for social media sharing")
+    canonical_url: Optional[str] = Field(None, description="Canonical URL for SEO")
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
         if hasattr(values, 'category_id') and isinstance(values.category_id, ObjectId):
@@ -90,6 +118,20 @@ class PostResponse(BaseModel):
     likes_count: int
     thumbnail: Optional[str] = None
     banner: Optional[str] = None
+    # SEO fields
+    meta_title: Optional[str] = None
+    meta_description: Optional[str] = None
+    meta_keywords: List[str] = Field(default_factory=list)
+    meta_robots: Optional[str] = None
+    og_title: Optional[str] = None
+    og_description: Optional[str] = None
+    og_image: Optional[str] = None
+    og_type: Optional[str] = None
+    twitter_card: Optional[str] = None
+    twitter_title: Optional[str] = None
+    twitter_description: Optional[str] = None
+    twitter_image: Optional[str] = None
+    canonical_url: Optional[str] = None
     # comments: List[CommentResponse] = []
     created_at: datetime
     updated_at: datetime

@@ -78,7 +78,21 @@ async def create_post(
             category_id=post_data.category_id,
             user_id=user_id,
             thumbnail=post_data.thumbnail,
-            banner=post_data.banner
+            banner=post_data.banner,
+            # SEO fields
+            meta_title=post_data.meta_title,
+            meta_description=post_data.meta_description,
+            meta_keywords=post_data.meta_keywords,
+            meta_robots=post_data.meta_robots,
+            og_title=post_data.og_title,
+            og_description=post_data.og_description,
+            og_image=post_data.og_image,
+            og_type=post_data.og_type,
+            twitter_card=post_data.twitter_card,
+            twitter_title=post_data.twitter_title,
+            twitter_description=post_data.twitter_description,
+            twitter_image=post_data.twitter_image,
+            canonical_url=post_data.canonical_url
         )
         return BaseResponse(success=True, data=post, message="Post created successfully")
     except ValueError as e:
