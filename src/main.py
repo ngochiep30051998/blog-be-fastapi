@@ -13,6 +13,7 @@ from src.infrastructure.middleware.auth_middleware import AuthMiddleware
 from src.infrastructure.mongo.database import MongoDatabase
 from src.domain.posts import api as postApi
 from src.domain.categories import api as categoriesApi
+from src.domain.tags import api as tagsApi
 from src.domain.auth import api as authApi
 from src.domain.users import api as usersApi
 from src.domain.files import api as fileApi
@@ -131,6 +132,7 @@ app.add_middleware(AuthMiddleware)
 # Routes
 app.include_router(postApi.router)
 app.include_router(categoriesApi.router)
+app.include_router(tagsApi.router)
 app.include_router(authApi.router)
 app.include_router(usersApi.router)
 app.include_router(fileApi.router)

@@ -8,6 +8,7 @@ from src.application.dto.post_dto import PostCreateRequest, PostUpdateRequest, P
 from src.application.services.post_service import PostService
 from src.infrastructure.mongo.post_repository_impl import MongoPostRepository
 from src.infrastructure.mongo.user_repository_impl import MongoUserRepository
+from src.infrastructure.mongo.tag_repository_impl import MongoTagRepository
 from ...infrastructure.mongo.database import get_database
 router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 
@@ -15,7 +16,8 @@ async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> 
     """Dependency: Get post application service"""
     post_repo = MongoPostRepository(db)
     user_repo = MongoUserRepository(db)
-    return PostService(post_repo, user_repo)
+    tag_repo = MongoTagRepository(db)
+    return PostService(post_repo, user_repo, tag_repo)
 
 
 
@@ -27,10 +29,28 @@ async def get_post_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> 
 async def get_posts(
     service: PostService = Depends(get_post_service),
     page: int = Query(1, ge=1, description="Page number"),
-    page_size: int = Query(10, ge=1, le=100, description="Number of posts per page")
+    page_size: int = Query(10, ge=1, le=100, description="Number of posts per page"),
+    tag_ids: List[str] = Query(None, description="Filter by tag IDs (comma-separated)"),
+    tag_names: List[str] = Query(None, description="Filter by tag names (comma-separated)"),
+    match_all: bool = Query(True, description="If true, posts must have ALL tags (AND). If false, posts must have ANY tag (OR)")
 ):
+    """
+    Get all blog posts with optional multi-tag filtering
+    
+    - **tag_ids**: Filter posts by tag IDs (e.g., ?tag_ids=id1&tag_ids=id2)
+    - **tag_names**: Filter posts by tag names (e.g., ?tag_names=python&tag_names=fastapi)
+    - **match_all**: 
+        - `true` (default): Posts must have ALL specified tags (AND logic)
+        - `false`: Posts must have ANY of the specified tags (OR logic)
+    """
     skip = (page - 1) * page_size
-    posts, total = (await service.get_all_posts(skip=skip, limit=page_size))
+    posts, total = await service.get_all_posts(
+        skip=skip, 
+        limit=page_size,
+        tag_ids=tag_ids,
+        tag_names=tag_names,
+        match_all=match_all
+    )
     return BaseResponse(success=True, data=posts, total=total, page=page, page_size=page_size)
 
 @router.post(

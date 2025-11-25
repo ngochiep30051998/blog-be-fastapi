@@ -16,7 +16,9 @@ class PostEntity(BaseModel):
     author_name: Optional[str] = None
     author_email: Optional[str] = None
     status: PostStatus = PostStatus.DRAFT
-    tags: List[str] = Field(default_factory=list)
+    tag_ids: List[PyObjectId] = Field(default_factory=list)
+    tag_names: List[str] = Field(default_factory=list)  # Denormalized for faster reads
+    tag_slugs: List[str] = Field(default_factory=list)  # Denormalized tag slugs for faster reads
     category_id: Optional[PyObjectId] = None
     views_count: int = 0
     likes_count: int = 0

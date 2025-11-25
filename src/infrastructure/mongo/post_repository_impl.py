@@ -11,6 +11,7 @@ class MongoPostRepository(PostRepository):
         self.db = db
         self.collection = db["posts"]
     async def list_posts(self, skip: int = 0, limit: int = 10):
+        # Include $lookup for tags to populate full tag objects in response
         pipeline = [
             {"$match": {"deleted_at": None}},
             {
@@ -22,6 +23,14 @@ class MongoPostRepository(PostRepository):
                 }
             },
             {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}},
+            {
+                "$lookup": {
+                    "from": "tags",
+                    "localField": "tag_ids",
+                    "foreignField": "_id",
+                    "as": "tags"
+                }
+            },
             {"$skip": skip},
             {"$limit": limit}
         ]
@@ -40,7 +49,9 @@ class MongoPostRepository(PostRepository):
             "author_name": post.author_name,
             "author_email": post.author_email,
             "status": post.status.value,
-            "tags": post.tags,
+            "tag_ids": post.tag_ids,
+            "tag_names": post.tag_names,  # Denormalized for faster reads
+            "tag_slugs": post.tag_slugs,  # Denormalized tag slugs for faster reads
             "category_id": post.category_id,
             "views_count": post.views_count,
             "likes_count": post.likes_count,
@@ -68,6 +79,8 @@ class MongoPostRepository(PostRepository):
         return post
 
     async def get_by_id(self, post_id: ObjectId) -> Optional[dict]:
+        # Optimized: No $lookup for tags since tag_names are stored directly
+        # Still do $lookup for full tag objects if needed, but tag_names are available immediately
         pipeline = [
             {"$match": {"_id": ObjectId(post_id),"deleted_at": None}},
             {
@@ -78,7 +91,15 @@ class MongoPostRepository(PostRepository):
                     "as": "category"            
                 }
             },
-            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}} 
+            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}},
+            {
+                "$lookup": {
+                    "from": "tags",
+                    "localField": "tag_ids",
+                    "foreignField": "_id",
+                    "as": "tags"
+                }
+            }
         ]
 
         cursor = self.collection.aggregate(pipeline)
@@ -103,14 +124,152 @@ class MongoPostRepository(PostRepository):
         results = await cursor.to_list(length=None)
         return results
     
-    async def find_by_tag(self, tag: str, skip: int = 0, limit: int = 10) -> List[PostEntity]:
-        """Find posts by tag"""
+    async def find_by_tag(self, tag_id: ObjectId, skip: int = 0, limit: int = 10) -> List[PostEntity]:
+        """Find posts by tag ID"""
         cursor = self.collection.find(
-            {"status": PostStatus.PUBLISHED.value, "tags": tag}
+            {"status": PostStatus.PUBLISHED.value, "tag_ids": tag_id, "deleted_at": None}
         ).sort("published_at", -1).skip(skip).limit(limit)
         
         results = await cursor.to_list(length=None)
         return results
+    
+    async def find_by_tag_name(self, tag_name: str, skip: int = 0, limit: int = 10) -> List[dict]:
+        """Find posts by tag name (optimized using denormalized tag_names field)"""
+        cursor = self.collection.find(
+            {"status": PostStatus.PUBLISHED.value, "tag_names": tag_name, "deleted_at": None}
+        ).sort("published_at", -1).skip(skip).limit(limit)
+        
+        results = await cursor.to_list(length=None)
+        return results
+    
+    async def find_by_tag_slug(self, tag_slug: str, skip: int = 0, limit: int = 10) -> List[dict]:
+        """Find posts by tag slug (optimized using denormalized tag_slugs field)"""
+        cursor = self.collection.find(
+            {"status": PostStatus.PUBLISHED.value, "tag_slugs": tag_slug, "deleted_at": None}
+        ).sort("published_at", -1).skip(skip).limit(limit)
+        
+        results = await cursor.to_list(length=None)
+        return results
+    
+    async def find_by_tag_ids(self, tag_ids: List[ObjectId], match_all: bool = True, skip: int = 0, limit: int = 10, status: str = None) -> List[dict]:
+        """
+        Find posts by multiple tag IDs
+        Args:
+            tag_ids: List of tag IDs to filter by
+            match_all: If True, posts must have ALL tags (AND). If False, posts must have ANY tag (OR)
+            skip: Number of documents to skip
+            limit: Maximum number of documents to return
+            status: Optional status filter (e.g., 'published', 'draft')
+        """
+        query = {"deleted_at": None}
+        
+        if status:
+            query["status"] = status
+        
+        if match_all:
+            # Posts must have ALL specified tags (AND logic)
+            query["tag_ids"] = {"$all": tag_ids}
+        else:
+            # Posts must have ANY of the specified tags (OR logic)
+            query["tag_ids"] = {"$in": tag_ids}
+        
+        cursor = self.collection.find(query).sort("published_at", -1).skip(skip).limit(limit)
+        results = await cursor.to_list(length=limit)
+        return results
+    
+    async def find_by_tag_names(self, tag_names: List[str], match_all: bool = True, skip: int = 0, limit: int = 10, status: str = None) -> List[dict]:
+        """
+        Find posts by multiple tag names (optimized using denormalized tag_names field)
+        Args:
+            tag_names: List of tag names to filter by
+            match_all: If True, posts must have ALL tags (AND). If False, posts must have ANY tag (OR)
+            skip: Number of documents to skip
+            limit: Maximum number of documents to return
+            status: Optional status filter (e.g., 'published', 'draft')
+        """
+        query = {"deleted_at": None}
+        
+        if status:
+            query["status"] = status
+        
+        if match_all:
+            # Posts must have ALL specified tags (AND logic)
+            query["tag_names"] = {"$all": tag_names}
+        else:
+            # Posts must have ANY of the specified tags (OR logic)
+            query["tag_names"] = {"$in": tag_names}
+        
+        cursor = self.collection.find(query).sort("published_at", -1).skip(skip).limit(limit)
+        results = await cursor.to_list(length=limit)
+        return results
+    
+    async def find_by_tag_slugs(self, tag_slugs: List[str], match_all: bool = True, skip: int = 0, limit: int = 10, status: str = None) -> List[dict]:
+        """
+        Find posts by multiple tag slugs (optimized using denormalized tag_slugs field)
+        Args:
+            tag_slugs: List of tag slugs to filter by
+            match_all: If True, posts must have ALL tags (AND). If False, posts must have ANY tag (OR)
+            skip: Number of documents to skip
+            limit: Maximum number of documents to return
+            status: Optional status filter (e.g., 'published', 'draft')
+        """
+        query = {"deleted_at": None}
+        
+        if status:
+            query["status"] = status
+        
+        if match_all:
+            # Posts must have ALL specified tags (AND logic)
+            query["tag_slugs"] = {"$all": tag_slugs}
+        else:
+            # Posts must have ANY of the specified tags (OR logic)
+            query["tag_slugs"] = {"$in": tag_slugs}
+        
+        cursor = self.collection.find(query).sort("published_at", -1).skip(skip).limit(limit)
+        results = await cursor.to_list(length=limit)
+        return results
+    
+    async def count_by_tag_ids(self, tag_ids: List[ObjectId], match_all: bool = True, status: str = None) -> int:
+        """Count posts by multiple tag IDs"""
+        query = {"deleted_at": None}
+        
+        if status:
+            query["status"] = status
+        
+        if match_all:
+            query["tag_ids"] = {"$all": tag_ids}
+        else:
+            query["tag_ids"] = {"$in": tag_ids}
+        
+        return await self.collection.count_documents(query)
+    
+    async def count_by_tag_names(self, tag_names: List[str], match_all: bool = True, status: str = None) -> int:
+        """Count posts by multiple tag names"""
+        query = {"deleted_at": None}
+        
+        if status:
+            query["status"] = status
+        
+        if match_all:
+            query["tag_names"] = {"$all": tag_names}
+        else:
+            query["tag_names"] = {"$in": tag_names}
+        
+        return await self.collection.count_documents(query)
+    
+    async def count_by_tag_slugs(self, tag_slugs: List[str], match_all: bool = True, status: str = None) -> int:
+        """Count posts by multiple tag slugs"""
+        query = {"deleted_at": None}
+        
+        if status:
+            query["status"] = status
+        
+        if match_all:
+            query["tag_slugs"] = {"$all": tag_slugs}
+        else:
+            query["tag_slugs"] = {"$in": tag_slugs}
+        
+        return await self.collection.count_documents(query)
     
     async def delete(self, post_id: ObjectId) -> bool:
         """Delete post"""
