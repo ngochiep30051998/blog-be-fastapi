@@ -22,7 +22,9 @@ class PostService:
                           excerpt: str = None, 
                           tags: list = [], 
                           category_id: str = None,
-                          user_id: str = None
+                          user_id: str = None,
+                          thumbnail: str = None,
+                          banner: str = None
                           ):
         # Create post aggregate
         author = await self.user_repo.get_by_id(user_id)
@@ -36,7 +38,9 @@ class PostService:
             tags=tags or [],
             category_id=category_id,
             author_name=author.get("full_name") if author else "Unknown",
-            author_email=author.get("email") if author else "Unknown"
+            author_email=author.get("email") if author else "Unknown",
+            thumbnail=thumbnail,
+            banner=banner
         )
         saved_post = await self.post_repo.create_post(post)
         return saved_post

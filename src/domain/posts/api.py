@@ -56,7 +56,9 @@ async def create_post(
             excerpt=post_data.excerpt,
             tags=post_data.tags,
             category_id=post_data.category_id,
-            user_id=user_id
+            user_id=user_id,
+            thumbnail=post_data.thumbnail,
+            banner=post_data.banner
         )
         return BaseResponse(success=True, data=post, message="Post created successfully")
     except ValueError as e:

@@ -20,6 +20,8 @@ class PostEntity(BaseModel):
     category_id: Optional[PyObjectId] = None
     views_count: int = 0
     likes_count: int = 0
+    thumbnail: Optional[str] = None
+    banner: Optional[str] = None
     # comments: List[Comment] = field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

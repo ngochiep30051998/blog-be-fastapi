@@ -18,6 +18,8 @@ class PostCreateRequest(BaseModel):
     excerpt: Optional[str] = None
     tags: Optional[List[str]] = []
     category_id: Optional[str] = None
+    thumbnail: Optional[str] = None
+    banner: Optional[str] = None
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
         if hasattr(values, 'category_id') and isinstance(values.category_id, ObjectId):
@@ -38,6 +40,8 @@ class PostUpdateRequest(BaseModel):
     excerpt: Optional[str] = None
     tags: Optional[List[str]] = None
     category_id: Optional[str] = None
+    thumbnail: Optional[str] = None
+    banner: Optional[str] = None
     @model_validator(mode="before")
     def convert_objectid(cls, values: Any) -> Any:
         if hasattr(values, 'category_id') and isinstance(values.category_id, ObjectId):
@@ -63,6 +67,8 @@ class PostResponse(BaseModel):
     category: Optional[CategoryResponse] = None  # change category_id to object
     views_count: int
     likes_count: int
+    thumbnail: Optional[str] = None
+    banner: Optional[str] = None
     # comments: List[CommentResponse] = []
     created_at: datetime
     updated_at: datetime
