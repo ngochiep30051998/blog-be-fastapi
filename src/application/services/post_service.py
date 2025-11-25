@@ -8,6 +8,7 @@ from src.infrastructure.mongo.user_repository_impl import MongoUserRepository
 from src.infrastructure.mongo.tag_repository_impl import MongoTagRepository
 from src.application.services.tag_service import TagService
 from src.application.dto.post_dto import TagInput
+from pydantic import BaseModel
 
 class PostService:
     def __init__(self, post_repo: MongoPostRepository, user_repo: MongoUserRepository, tag_repo: MongoTagRepository = None):
@@ -32,15 +33,19 @@ class PostService:
             return tag_ids, tag_names, tag_slugs
         
         for tag_input in tag_inputs:
-            # Handle TagInput object (from DTO)
-            if hasattr(tag_input, 'id') or hasattr(tag_input, 'name'):
+            # Handle TagInput object (Pydantic model from DTO)
+            if isinstance(tag_input, BaseModel):
                 tag_id = getattr(tag_input, 'id', None)
                 tag_name = getattr(tag_input, 'name', None)
-            # Handle dict (from model_dump)
+            # Handle dict (from model_dump or JSON)
             elif isinstance(tag_input, dict):
                 tag_id = tag_input.get('id')
                 tag_name = tag_input.get('name')
-            # Handle string (backward compatibility)
+            # Handle object with attributes (fallback)
+            elif hasattr(tag_input, 'id') or hasattr(tag_input, 'name'):
+                tag_id = getattr(tag_input, 'id', None)
+                tag_name = getattr(tag_input, 'name', None)
+            # Handle string (backward compatibility - should not reach here if detection works)
             elif isinstance(tag_input, str):
                 tag_id = None
                 tag_name = tag_input
@@ -141,8 +146,25 @@ class PostService:
         tag_names = []
         tag_slugs = []
         if tags:
-            # Check if tags are TagInput objects or simple strings (backward compatibility)
-            if tags and isinstance(tags[0], (dict, type)) and (hasattr(tags[0], 'id') or hasattr(tags[0], 'name') or isinstance(tags[0], dict)):
+            # Check if tags are TagInput objects (Pydantic models or dicts) or simple strings
+            is_tag_input = False
+            if tags and len(tags) > 0:
+                first_tag = tags[0]
+                # Check if it's a TagInput object (Pydantic BaseModel with 'id' or 'name') or a dict with those keys
+                if isinstance(first_tag, BaseModel):
+                    # It's a Pydantic model, check if it has id or name attributes
+                    is_tag_input = hasattr(first_tag, 'id') or hasattr(first_tag, 'name')
+                elif isinstance(first_tag, dict):
+                    # It's a dict, check if it has id or name keys
+                    is_tag_input = 'id' in first_tag or 'name' in first_tag
+                elif isinstance(first_tag, str):
+                    # It's a string, use old format
+                    is_tag_input = False
+                else:
+                    # Unknown type, try to check for attributes
+                    is_tag_input = hasattr(first_tag, 'id') or hasattr(first_tag, 'name')
+            
+            if is_tag_input:
                 # New format: TagInput objects
                 tag_ids, tag_names, tag_slugs = await self._process_tag_inputs(tags)
             else:
