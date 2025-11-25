@@ -197,7 +197,6 @@ async def unlock_user(
     Resets all lockout-related fields: locked, failed_attempts, locked_until.
     This action is logged for audit purposes.
     """
-    print("unlock user")
     # Get admin user info for audit logging
     admin_user_id = request.state.user_id
     admin_user = await service.get_by_id(admin_user_id)
@@ -222,7 +221,6 @@ async def unlock_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to unlock user"
         )
-    print("audit log:", updated_user)
     # Log the unlock action for audit purposes
     await audit_service.log_admin_action(
         action="unlock_user",
