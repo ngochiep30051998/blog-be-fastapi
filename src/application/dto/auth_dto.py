@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.application.dto.user_dto import UserResponse
@@ -17,8 +18,8 @@ class RegisterRequest(BaseModel):
     full_name: str
     email: str
     password: str
-    date_of_birth: str | None = None
-    role: UserRole | None = None
+    date_of_birth: Optional[str] = None
+    role: Optional[UserRole] = None
 class RegisterResponse(BaseModel):
     access_token: str
     token_type: str
