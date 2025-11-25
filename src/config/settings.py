@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: Optional[str] = None
     ENABLE_RATE_LIMITING: Optional[bool] = True
     ENVIRONMENT: Optional[str] = None  # Added environment setting
+    MAX_FAILED_LOGIN_ATTEMPTS: Optional[int] = 5  # Maximum failed login attempts before lockout
+    ACCOUNT_LOCKOUT_DURATION_MINUTES: Optional[int] = 15  # Account lockout duration in minutes (15-30)
     class Config:
         env_file = ".env"
 

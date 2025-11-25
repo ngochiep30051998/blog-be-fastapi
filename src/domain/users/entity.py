@@ -19,6 +19,8 @@ class UserEntity(BaseModel):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     deleted_at: Optional[datetime] = None
     locked: bool = False
+    failed_attempts: int = 0
+    locked_until: Optional[datetime] = None
     class Config:
         validate_by_name = True
         json_encoders = {

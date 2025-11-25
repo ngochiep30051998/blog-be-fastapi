@@ -39,12 +39,125 @@ class UserService:
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
     
+    def _is_account_locked(self, user: dict) -> bool:
+        """Check if account is locked (either manually locked or lockout period active)"""
+        if user.get("locked", False):
+            return True
+        
+        # Check if lockout period has expired
+        locked_until = user.get("locked_until")
+        if locked_until:
+            # Handle both datetime objects and ISO format strings
+            if isinstance(locked_until, str):
+                try:
+                    locked_until = datetime.fromisoformat(locked_until.replace('Z', '+00:00'))
+                except (ValueError, AttributeError):
+                    # Fallback: try parsing common formats
+                    try:
+                        locked_until = datetime.strptime(locked_until, "%Y-%m-%dT%H:%M:%S.%fZ")
+                        locked_until = locked_until.replace(tzinfo=timezone.utc)
+                    except ValueError:
+                        # If parsing fails, assume not locked
+                        return False
+            # Ensure timezone awareness
+            if locked_until.tzinfo is None:
+                locked_until = locked_until.replace(tzinfo=timezone.utc)
+            
+            if locked_until > datetime.now(timezone.utc):
+                return True
+            else:
+                # Lockout period expired, but account might still be marked as locked
+                # We'll auto-unlock it
+                return False
+        
+        return False
+    
+    async def _increment_failed_attempts(self, user_id: str) -> dict:
+        """Increment failed login attempts and lock account if threshold reached"""
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            return None
+        
+        failed_attempts = user.get("failed_attempts", 0) + 1
+        max_attempts = settings.MAX_FAILED_LOGIN_ATTEMPTS or 5
+        
+        update_data = {
+            "failed_attempts": failed_attempts,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        # Lock account if threshold reached
+        if failed_attempts >= max_attempts:
+            lockout_duration = settings.ACCOUNT_LOCKOUT_DURATION_MINUTES or 15
+            locked_until = datetime.now(timezone.utc) + timedelta(minutes=lockout_duration)
+            update_data["locked"] = True
+            update_data["locked_until"] = locked_until
+        
+        updated_user = await self.user_repo.update_user(ObjectId(user_id), update_data)
+        return updated_user
+    
+    async def _reset_failed_attempts(self, user_id: str):
+        """Reset failed login attempts on successful login"""
+        update_data = {
+            "failed_attempts": 0,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        await self.user_repo.update_user(ObjectId(user_id), update_data)
+    
     async def authenticate_user(self, email: str, password: str):
+        """Authenticate user and check lockout status"""
         user = await self.user_repo.get_by_email(email)
         if not user:
             return False
+        
+        # Check if account is locked BEFORE password verification
+        if self._is_account_locked(user):
+            # If lockout period expired, auto-unlock
+            locked_until = user.get("locked_until")
+            if locked_until:
+                # Handle both datetime objects and ISO format strings
+                if isinstance(locked_until, str):
+                    try:
+                        locked_until = datetime.fromisoformat(locked_until.replace('Z', '+00:00'))
+                    except (ValueError, AttributeError):
+                        try:
+                            locked_until = datetime.strptime(locked_until, "%Y-%m-%dT%H:%M:%S.%fZ")
+                            locked_until = locked_until.replace(tzinfo=timezone.utc)
+                        except ValueError:
+                            # If parsing fails, treat as expired
+                            locked_until = datetime.now(timezone.utc) - timedelta(seconds=1)
+                
+                # Ensure timezone awareness
+                if locked_until.tzinfo is None:
+                    locked_until = locked_until.replace(tzinfo=timezone.utc)
+                
+                if locked_until <= datetime.now(timezone.utc):
+                    # Auto-unlock expired lockout
+                    await self.user_repo.update_user(
+                        ObjectId(str(user["_id"])),
+                        {
+                            "locked": False,
+                            "locked_until": None,
+                            "failed_attempts": 0,
+                            "updated_at": datetime.now(timezone.utc)
+                        }
+                    )
+                    # Re-fetch user after unlock
+                    user = await self.user_repo.get_by_email(email)
+                else:
+                    # Still locked
+                    remaining_minutes = int((locked_until - datetime.now(timezone.utc)).total_seconds() / 60)
+                    raise ValueError(f"User account is locked. Please try again in {remaining_minutes} minutes or contact an administrator.")
+            else:
+                # Manually locked
+                raise ValueError("User account is locked. Please contact an administrator.")
+        
+        # Verify password
         if not self.verify_password(password, user.get('password_hash')):
+            # Increment failed attempts
+            await self._increment_failed_attempts(str(user["_id"]))
             return False
+        
         return user
     
     async def register_user(self, full_name: str, email: str, password: str, date_of_birth=None, role: UserRole = None):
@@ -80,17 +193,22 @@ class UserService:
             JWT token if authentication succeeds, None otherwise
         
         Raises:
-            ValueError: If user is locked
+            ValueError: If user is locked or account is locked
         """
-        user = await self.authenticate_user(email, password)
+        try:
+            user = await self.authenticate_user(email, password)
+        except ValueError as e:
+            # Re-raise lockout errors
+            raise e
+        
         if not user:
             return None
         
-        # Check if user is locked
-        if user.get("locked", False):
-            raise ValueError("User account is locked. Please contact an administrator.")
-        
         user_id = str(user["_id"])
+        
+        # Reset failed attempts on successful login
+        await self._reset_failed_attempts(user_id)
+        
         # Invalidate any existing session before creating new one
         await self.session_service.invalidate_session(user_id)
         
@@ -137,7 +255,27 @@ class UserService:
             "locked": locked,
             "updated_at": datetime.now(timezone.utc)
         }
+        # If unlocking, also clear lockout-related fields
+        if not locked:
+            update_data["locked_until"] = None
+            update_data["failed_attempts"] = 0
         # Update user and get updated user (password_hash already removed by repository)
+        updated_user = await self.user_repo.update_user(ObjectId(user_id), update_data)
+        if not updated_user:
+            raise ValueError("User not found or update failed")
+        return updated_user
+    
+    async def unlock_user(self, user_id: str):
+        """
+        Unlock a user account (admin only).
+        Resets all lockout-related fields: locked, failed_attempts, locked_until
+        """
+        update_data = {
+            "locked": False,
+            "locked_until": None,
+            "failed_attempts": 0,
+            "updated_at": datetime.now(timezone.utc)
+        }
         updated_user = await self.user_repo.update_user(ObjectId(user_id), update_data)
         if not updated_user:
             raise ValueError("User not found or update failed")
@@ -156,8 +294,26 @@ class UserService:
         if not user:
             raise ValueError("User not found")
         
-        # Check if user is locked
-        if user.get("locked", False):
+        # Check if user is locked (using same logic as login)
+        if self._is_account_locked(user):
+            # Check if lockout period expired
+            locked_until = user.get("locked_until")
+            if locked_until:
+                if isinstance(locked_until, str):
+                    try:
+                        locked_until = datetime.fromisoformat(locked_until.replace('Z', '+00:00'))
+                    except (ValueError, AttributeError):
+                        try:
+                            locked_until = datetime.strptime(locked_until, "%Y-%m-%dT%H:%M:%S.%fZ")
+                            locked_until = locked_until.replace(tzinfo=timezone.utc)
+                        except ValueError:
+                            locked_until = datetime.now(timezone.utc) - timedelta(seconds=1)
+                if locked_until.tzinfo is None:
+                    locked_until = locked_until.replace(tzinfo=timezone.utc)
+                
+                if locked_until > datetime.now(timezone.utc):
+                    remaining_minutes = int((locked_until - datetime.now(timezone.utc)).total_seconds() / 60)
+                    raise ValueError(f"User account is locked. Please try again in {remaining_minutes} minutes or contact an administrator.")
             raise ValueError("User account is locked. Please contact an administrator.")
         
         # Verify old password

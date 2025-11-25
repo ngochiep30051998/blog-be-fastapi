@@ -24,7 +24,10 @@ class MongoUserRepository(UserRepository):
             "role": user.role,
             "date_of_birth": user.date_of_birth,
             "created_at": user.created_at,
-            "updated_at": user.updated_at
+            "updated_at": user.updated_at,
+            "locked": user.locked,
+            "failed_attempts": user.failed_attempts,
+            "locked_until": user.locked_until
         }
         await self.collection.update_one(
             {"_id": data["_id"]},

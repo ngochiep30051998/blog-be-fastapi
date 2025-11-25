@@ -22,6 +22,8 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     locked: bool = False
+    failed_attempts: int = 0
+    locked_until: Optional[datetime] = None
 
 
 class UserUpdateRequest(BaseModel):
