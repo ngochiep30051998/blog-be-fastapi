@@ -6,7 +6,7 @@ from bson import ObjectId
 
 from src.application.dependencies.role_checker import RoleChecker
 from src.application.dto.base_dto import BaseResponse
-from src.application.dto.user_dto import UserResponse, UserUpdateRequest, UserLockRequest, ChangePasswordRequest
+from src.application.dto.user_dto import UserResponse, UserUpdateRequest, ChangePasswordRequest
 from src.application.services.user_service import UserService
 from src.application.services.audit_service import AuditService
 from src.infrastructure.mongo.database import get_database
@@ -126,21 +126,30 @@ async def update_user(
     return BaseResponse(success=True, message="User updated successfully", data=updated_user)
 
 
-@router.patch("/{user_id}/lock", 
-              summary="Lock or unlock user", 
+@router.post("/{user_id}/lock", 
+              summary="Lock user account", 
               response_model=BaseResponse[UserResponse],
               dependencies=[Depends(RoleChecker(allowed_roles=["admin"]))])
 async def lock_user(
     user_id: str,
-    lock_data: UserLockRequest,
     request: Request,
     service: UserService = Depends(get_user_service),
+    audit_service: AuditService = Depends(get_audit_service),
 ):
     """
-    Lock or unlock a user
-    Requires: Admin role
+    Lock a user account (admin only).
+    This action is logged for audit purposes.
     """
-    # Check if user exists
+    # Get admin user info for audit logging
+    admin_user_id = request.state.user_id
+    admin_user = await service.get_by_id(admin_user_id)
+    if not admin_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Admin user not found"
+        )
+    
+    # Check if target user exists
     target_user = await service.get_by_id(user_id)
     if not target_user:
         raise HTTPException(
@@ -148,16 +157,29 @@ async def lock_user(
             detail="User not found"
         )
     
-    # Lock/unlock user
-    updated_user = await service.lock_user(user_id, lock_data.locked)
+    # Lock user (always lock, no request body needed)
+    updated_user = await service.lock_user(user_id, True)
     if not updated_user:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update user lock status"
+            detail="Failed to lock user"
         )
     
-    action = "locked" if lock_data.locked else "unlocked"
-    return BaseResponse(success=True, message=f"User {action} successfully", data=updated_user)
+    # Log the lock action for audit purposes
+    await audit_service.log_admin_action(
+        action="lock_user",
+        admin_user_id=admin_user_id,
+        admin_user_email=admin_user.get("email", "unknown"),
+        target_user_id=user_id,
+        target_user_email=target_user.get("email", "unknown"),
+        details={
+            "previous_locked_status": target_user.get("locked", False),
+            "previous_failed_attempts": target_user.get("failed_attempts", 0),
+            "previous_locked_until": str(target_user.get("locked_until")) if target_user.get("locked_until") else None
+        }
+    )
+    
+    return BaseResponse(success=True, message="User locked successfully", data=updated_user)
 
 
 @router.post("/{user_id}/unlock", 
@@ -175,6 +197,7 @@ async def unlock_user(
     Resets all lockout-related fields: locked, failed_attempts, locked_until.
     This action is logged for audit purposes.
     """
+    print("unlock user")
     # Get admin user info for audit logging
     admin_user_id = request.state.user_id
     admin_user = await service.get_by_id(admin_user_id)
@@ -199,7 +222,7 @@ async def unlock_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to unlock user"
         )
-    
+    print("audit log:", updated_user)
     # Log the unlock action for audit purposes
     await audit_service.log_admin_action(
         action="unlock_user",
