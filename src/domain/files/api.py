@@ -15,6 +15,8 @@ cloudinary.config(
     cloud_name=settings.CLOUDINARY_CLOUD_NAME,
     api_key=settings.CLOUDINARY_API_KEY,
     api_secret=settings.CLOUDINARY_API_SECRET,
+
+    
 )
 router = APIRouter(prefix="/api/v1/file", tags=["file"])
 async def get_file_service(db: AsyncIOMotorDatabase = Depends(get_database)) -> FileService:
@@ -26,7 +28,7 @@ async def upload_file(
     image: UploadFile,
     request: Request, 
     file_service: FileService = Depends(get_file_service)):
-    upload_result = cloudinary.uploader.upload(image.file)
+    upload_result = cloudinary.uploader.upload(image.file, folder=settings.CLOUDINARY_CLOUD_FOLDER)
     file_url = upload_result['secure_url']
     name = image.filename
     mine_type = upload_result['resource_type'] + '/' + upload_result['format']
@@ -42,9 +44,11 @@ async def delete_file(
     file_service: FileService = Depends(get_file_service)
 ):
     file = await file_service.get_file(file_id)
+    print("file:", file_id)
     if not file:
         return BaseResponse(success=False, message="File not found")
-    await cloudinary.uploader.destroy(file['cloudinary_id'])
+    cloudinary.uploader.destroy(file['cloudinary_id'])
+    print("file deleted", file_id, file['cloudinary_id'])
     await file_service.delete_file(file_id)
     return BaseResponse(success=True, data={"message": "File deleted successfully"})
 @router.get("/list", summary="list files", response_model=BaseResponse[List[FileResponse]])

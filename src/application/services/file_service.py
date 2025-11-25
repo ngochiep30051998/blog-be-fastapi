@@ -15,7 +15,7 @@ class FileService:
         await self.repository.update_file(file_id, file_data)
 
     async def delete_file(self, file_id):
-        await self.repository.delete(file_id)
+        return await self.repository.delete(file_id)
 
     async def list_files(self, skip: int = 0, limit: int = 10):
         files = await self.repository.list_files(skip, limit)

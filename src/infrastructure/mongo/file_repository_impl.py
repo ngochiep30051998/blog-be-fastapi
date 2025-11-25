@@ -1,3 +1,4 @@
+from bson import ObjectId
 from src.domain.files.repository import FileRepository
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -11,14 +12,14 @@ class MongoFileRepository(FileRepository):
         return str(result.inserted_id)
 
     async def get_by_id(self, file_id):
-        file_data = await self.collection.find_one({"_id": file_id})
+        file_data = await self.collection.find_one({"_id": ObjectId(file_id)})
         return file_data
 
     async def update_file(self, file_id, file_data):
         await self.collection.update_one({"_id": file_id}, {"$set": file_data})
 
     async def delete(self, file_id):
-        await self.collection.delete_one({"_id": file_id})
+        await self.collection.delete_one({"_id": ObjectId(file_id)})
 
     async def list_files(self, skip: int = 0, limit: int = 10):
         cursor = self.collection.find().skip(skip).limit(limit)
