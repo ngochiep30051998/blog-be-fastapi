@@ -1,8 +1,8 @@
 # src/config/settings.py
 
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
-from typing import List, Optional, Set, Union
+from pydantic import field_validator, model_validator
+from typing import List, Optional, Set, Union, Any, Dict
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -56,6 +56,18 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_FOLDER: str
     ALLOWED_MIME_TYPES_STR: str = "image/jpeg,image/png,image/gif"
     
+    @model_validator(mode='before')
+    @classmethod
+    def handle_allowed_mime_types_alias(cls, data: Any) -> Any:
+        """Handle both ALLOWED_MIME_TYPES and ALLOWED_MIME_TYPES_STR environment variables"""
+        if isinstance(data, dict):
+            # If ALLOWED_MIME_TYPES is present but ALLOWED_MIME_TYPES_STR is not, copy it
+            if 'ALLOWED_MIME_TYPES' in data and 'ALLOWED_MIME_TYPES_STR' not in data:
+                data['ALLOWED_MIME_TYPES_STR'] = data['ALLOWED_MIME_TYPES']
+            # Remove ALLOWED_MIME_TYPES to avoid "extra inputs" error
+            data.pop('ALLOWED_MIME_TYPES', None)
+        return data
+    
     @property
     def ALLOWED_MIME_TYPES(self) -> Set[str]:
         """Parse ALLOWED_MIME_TYPES_STR into a set"""
@@ -78,5 +90,6 @@ class Settings(BaseSettings):
     ACCOUNT_LOCKOUT_DURATION_MINUTES: Optional[int] = 15  # Account lockout duration in minutes (15-30)
     class Config:
         env_file = ".env"
+        extra = "ignore"  # Ignore extra fields from environment to avoid errors
 
 settings = Settings()
