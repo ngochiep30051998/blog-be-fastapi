@@ -16,17 +16,18 @@ services:
     networks:
       - blog-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:${MONGODB_DB_PORT:-27017}/test -u ${MONGO_ROOT_USERNAME:-admin} -p ${MONGO_ROOT_PASSWORD:-password}
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping').ok", "--quiet"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   redis:
     image: redis:7.2-alpine
     container_name: personal-blog-redis
     ports:
       - "6379:6379"
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-}"]
+    command: redis-server ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     networks:
@@ -36,6 +37,66 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: personal-blog-api
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      # MongoDB settings
+      MONGODB_URL: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGODB_DB_NAME:-blog}?authSource=admin
+      MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME:-blog}
+      # Redis settings
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # API settings
+      API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DEBUG: ${DEBUG:-false}
+      APP_PORT: 8000
+      # Security settings
+      SECRET_KEY: ${SECRET_KEY:-changeme-in-production}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      # CORS settings
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080,http://localhost:4200}
+      ALLOWED_MIME_TYPES_STR: ${ALLOWED_MIME_TYPES_STR:-image/jpeg,image/png,image/gif}
+      # Cloudinary settings
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      CLOUDINARY_CLOUD_FOLDER: ${CLOUDINARY_CLOUD_FOLDER:-}
+      # Default user settings
+      DEFAULT_USER_EMAIL: ${DEFAULT_USER_EMAIL:-admin@example.com}
+      DEFAULT_USER_PASSWORD: ${DEFAULT_USER_PASSWORD:-admin123}
+      DEFAULT_USER_FULL_NAME: ${DEFAULT_USER_FULL_NAME:-Admin User}
+      DEFAULT_USER_ROLE: ${DEFAULT_USER_ROLE:-admin}
+      DEFAULT_USER_DATE_OF_BIRTH: ${DEFAULT_USER_DATE_OF_BIRTH:-1990-01-01}
+      # Feature flags
+      ENABLE_SEED_DATA: ${ENABLE_SEED_DATA:-false}
+      ENABLE_RATE_LIMITING: ${ENABLE_RATE_LIMITING:-true}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      MAX_FAILED_LOGIN_ATTEMPTS: ${MAX_FAILED_LOGIN_ATTEMPTS:-5}
+      ACCOUNT_LOCKOUT_DURATION_MINUTES: ${ACCOUNT_LOCKOUT_DURATION_MINUTES:-15}
+    volumes:
+      - ./src:/app/src
+    networks:
+      - blog-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   mongodb_data:

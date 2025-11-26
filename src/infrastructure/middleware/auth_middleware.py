@@ -23,6 +23,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Skip authentication for public routes
+        print("PUBLIC_ROUTES", settings.PUBLIC_ROUTES)
         if request.url.path in settings.PUBLIC_ROUTES:
             return await call_next(request)
         

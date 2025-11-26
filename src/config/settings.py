@@ -1,7 +1,8 @@
 # src/config/settings.py
 
 from pydantic_settings import BaseSettings
-from typing import List, Optional
+from pydantic import field_validator
+from typing import List, Optional, Set, Union
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -13,6 +14,37 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
     DEBUG: bool
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080","http://localhost:4200"]
+    
+    @field_validator('ALLOWED_ORIGINS', mode='before')
+    @classmethod
+    def parse_allowed_origins(cls, v: Union[str, List[str], None]) -> List[str]:
+        """Parse ALLOWED_ORIGINS from comma-separated string or list"""
+        if v is None:
+            return ["http://localhost:3000", "http://localhost:8080", "http://localhost:4200"]
+        if isinstance(v, str):
+            # Split by comma and strip whitespace
+            if not v.strip():
+                return ["http://localhost:3000", "http://localhost:8080", "http://localhost:4200"]
+            return [origin.strip() for origin in v.split(',') if origin.strip()]
+        if isinstance(v, list):
+            return v
+        return v
+    
+    @field_validator('PUBLIC_ROUTES', mode='before')
+    @classmethod
+    def parse_public_routes(cls, v: Union[str, List[str], None]) -> List[str]:
+        """Parse PUBLIC_ROUTES from comma-separated string or list"""
+        if v is None:
+            return []
+        if isinstance(v, str):
+            # Split by comma and strip whitespace, or return empty list if empty string
+            if not v.strip():
+                return []
+            return [route.strip() for route in v.split(',') if route.strip()]
+        if isinstance(v, list):
+            return v
+        return v
+    
     APP_PORT: int = 8000
     SECRET_KEY: str
     ALGORITHM: str
@@ -22,7 +54,14 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: str
     CLOUDINARY_CLOUD_FOLDER: str
-    ALLOWED_MIME_TYPES: str = {"image/jpeg", "image/png", "image/gif"}
+    ALLOWED_MIME_TYPES_STR: str = "image/jpeg,image/png,image/gif"
+    
+    @property
+    def ALLOWED_MIME_TYPES(self) -> Set[str]:
+        """Parse ALLOWED_MIME_TYPES_STR into a set"""
+        if not self.ALLOWED_MIME_TYPES_STR or not self.ALLOWED_MIME_TYPES_STR.strip():
+            return {"image/jpeg", "image/png", "image/gif"}
+        return {mime.strip() for mime in self.ALLOWED_MIME_TYPES_STR.split(',') if mime.strip()}
     DEFAULT_USER_EMAIL: str
     DEFAULT_USER_PASSWORD: str
     DEFAULT_USER_FULL_NAME: str
