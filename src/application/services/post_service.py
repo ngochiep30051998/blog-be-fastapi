@@ -335,3 +335,52 @@ class PostService:
         
         return await self.post_repo.update_post(ObjectId(post_id), update_dict)
     
+    async def get_published_posts(self, skip: int = 0, limit: int = 10, category_id: str = None, 
+                                  tag_ids: list = None, tag_names: list = None, tag_slugs: list = None, 
+                                  match_all: bool = True):
+        """
+        Get published posts only with optional filtering
+        Args:
+            skip: Number of posts to skip
+            limit: Maximum number of posts to return
+            category_id: Filter by category ID
+            tag_ids: List of tag IDs to filter by
+            tag_names: List of tag names to filter by
+            tag_slugs: List of tag slugs to filter by
+            match_all: If True, posts must have ALL tags (AND). If False, posts must have ANY tag (OR)
+        """
+        if tag_ids:
+            # Filter by tag IDs
+            tag_object_ids = [ObjectId(tid) if isinstance(tid, str) else tid for tid in tag_ids]
+            posts = await self.post_repo.find_by_tag_ids(tag_object_ids, match_all=match_all, skip=skip, limit=limit, status=PostStatus.PUBLISHED.value)
+            total = await self.post_repo.count_by_tag_ids(tag_object_ids, match_all=match_all, status=PostStatus.PUBLISHED.value)
+        elif tag_names:
+            # Filter by tag names (optimized using denormalized field)
+            posts = await self.post_repo.find_by_tag_names(tag_names, match_all=match_all, skip=skip, limit=limit, status=PostStatus.PUBLISHED.value)
+            total = await self.post_repo.count_by_tag_names(tag_names, match_all=match_all, status=PostStatus.PUBLISHED.value)
+        elif tag_slugs:
+            # Filter by tag slugs (optimized using denormalized field)
+            posts = await self.post_repo.find_by_tag_slugs(tag_slugs, match_all=match_all, skip=skip, limit=limit, status=PostStatus.PUBLISHED.value)
+            total = await self.post_repo.count_by_tag_slugs(tag_slugs, match_all=match_all, status=PostStatus.PUBLISHED.value)
+        else:
+            # No tag filtering, but filter by category if provided
+            posts = await self.post_repo.list_published_posts(skip=skip, limit=limit, category_id=category_id)
+            total = await self.post_repo.count_published_posts(category_id=category_id)
+        return posts, total
+    
+    async def get_published_post_by_slug(self, slug: str):
+        """Get published post by slug"""
+        return await self.post_repo.get_published_by_slug(slug)
+    
+    async def get_published_posts_by_tag_slug(self, tag_slug: str, skip: int = 0, limit: int = 10):
+        """Get published posts by tag slug"""
+        posts = await self.post_repo.find_published_by_tag_slug(tag_slug, skip=skip, limit=limit)
+        total = await self.post_repo.count_published_by_tag_slug(tag_slug)
+        return posts, total
+    
+    async def get_published_posts_by_category(self, category_id: str, skip: int = 0, limit: int = 10):
+        """Get published posts by category ID"""
+        posts = await self.post_repo.list_published_posts(skip=skip, limit=limit, category_id=category_id)
+        total = await self.post_repo.count_published_posts(category_id=category_id)
+        return posts, total
+    

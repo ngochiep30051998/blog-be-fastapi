@@ -24,7 +24,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         # Skip authentication for public routes
         print("PUBLIC_ROUTES", settings.PUBLIC_ROUTES)
+        # Check exact path match
         if request.url.path in settings.PUBLIC_ROUTES:
+            return await call_next(request)
+        
+        # Check if path starts with /web (public web endpoints)
+        if request.url.path.startswith("/web"):
             return await call_next(request)
         
         # Extract Authorization header

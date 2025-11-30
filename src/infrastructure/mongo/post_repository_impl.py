@@ -131,6 +131,144 @@ class MongoPostRepository(PostRepository):
             return None
         return result
     
+    async def get_published_by_slug(self, slug: str) -> Optional[dict]:
+        """Get published post by slug with lookups for tags and categories"""
+        pipeline = [
+            {
+                "$match": {
+                    "slug": slug,
+                    "status": PostStatus.PUBLISHED.value,
+                    "deleted_at": None
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "categories",
+                    "localField": "category_id",
+                    "foreignField": "_id",
+                    "as": "category"
+                }
+            },
+            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}},
+            {
+                "$lookup": {
+                    "from": "tags",
+                    "localField": "tag_ids",
+                    "foreignField": "_id",
+                    "as": "tags"
+                }
+            }
+        ]
+        cursor = self.collection.aggregate(pipeline)
+        result = await cursor.to_list(length=1)
+        if not result:
+            return None
+        return result[0]
+    
+    async def list_published_posts(self, skip: int = 0, limit: int = 10, category_id: str = None):
+        """List published posts with lookups for tags and categories"""
+        pipeline = [
+            {
+                "$match": {
+                    "status": PostStatus.PUBLISHED.value,
+                    "deleted_at": None
+                }
+            }
+        ]
+        
+        # Add category filter if provided
+        if category_id:
+            try:
+                category_object_id = ObjectId(category_id)
+                pipeline[0]["$match"]["category_id"] = category_object_id
+            except:
+                pass  # Invalid ObjectId, ignore filter
+        
+        pipeline.extend([
+            {
+                "$lookup": {
+                    "from": "categories",
+                    "localField": "category_id",
+                    "foreignField": "_id",
+                    "as": "category"
+                }
+            },
+            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}},
+            {
+                "$lookup": {
+                    "from": "tags",
+                    "localField": "tag_ids",
+                    "foreignField": "_id",
+                    "as": "tags"
+                }
+            },
+            {"$sort": {"published_at": -1}},
+            {"$skip": skip},
+            {"$limit": limit}
+        ])
+        
+        cursor = self.collection.aggregate(pipeline)
+        posts = await cursor.to_list(length=limit)
+        return posts
+    
+    async def count_published_posts(self, category_id: str = None) -> int:
+        """Count published posts"""
+        query = {
+            "status": PostStatus.PUBLISHED.value,
+            "deleted_at": None
+        }
+        
+        if category_id:
+            try:
+                query["category_id"] = ObjectId(category_id)
+            except:
+                pass  # Invalid ObjectId, ignore filter
+        
+        return await self.collection.count_documents(query)
+    
+    async def find_published_by_tag_slug(self, tag_slug: str, skip: int = 0, limit: int = 10) -> List[dict]:
+        """Find published posts by tag slug with lookups"""
+        pipeline = [
+            {
+                "$match": {
+                    "status": PostStatus.PUBLISHED.value,
+                    "tag_slugs": tag_slug,
+                    "deleted_at": None
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "categories",
+                    "localField": "category_id",
+                    "foreignField": "_id",
+                    "as": "category"
+                }
+            },
+            {"$unwind": {"path": "$category", "preserveNullAndEmptyArrays": True}},
+            {
+                "$lookup": {
+                    "from": "tags",
+                    "localField": "tag_ids",
+                    "foreignField": "_id",
+                    "as": "tags"
+                }
+            },
+            {"$sort": {"published_at": -1}},
+            {"$skip": skip},
+            {"$limit": limit}
+        ]
+        cursor = self.collection.aggregate(pipeline)
+        results = await cursor.to_list(length=limit)
+        return results
+    
+    async def count_published_by_tag_slug(self, tag_slug: str) -> int:
+        """Count published posts by tag slug"""
+        return await self.collection.count_documents({
+            "status": PostStatus.PUBLISHED.value,
+            "tag_slugs": tag_slug,
+            "deleted_at": None
+        })
+    
     async def find_published(self, skip: int = 0, limit: int = 10) -> List[PostEntity]:
         """Find published posts"""
         cursor = self.collection.find(

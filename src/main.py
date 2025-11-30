@@ -17,6 +17,7 @@ from src.domain.tags import api as tagsApi
 from src.domain.auth import api as authApi
 from src.domain.users import api as usersApi
 from src.domain.files import api as fileApi
+from src.domain.web import api as webApi
 from fastapi.openapi.utils import get_openapi
 
 from src.infrastructure.mongo.seeds.seed import seed_db
@@ -86,7 +87,8 @@ def custom_openapi():
     public_paths = settings.PUBLIC_ROUTES
     
     for path, path_item in openapi_schema["paths"].items():
-        if path in public_paths:
+        # Skip if path is in public routes or starts with /web
+        if path in public_paths or path.startswith("/web"):
             continue
         
         for method, operation in path_item.items():
@@ -130,6 +132,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 app.add_middleware(AuthMiddleware)  
 # Routes
+app.include_router(webApi.router)  # Public web endpoints - must be before other routes
 app.include_router(postApi.router)
 app.include_router(categoriesApi.router)
 app.include_router(tagsApi.router)
