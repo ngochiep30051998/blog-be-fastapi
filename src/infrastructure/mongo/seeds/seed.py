@@ -112,7 +112,7 @@ class MongoSeeder:
                 "title": "Getting Started with FastAPI",
                 "slug": "getting-started-with-fastapi",
                 "excerpt": "Learn how to build modern APIs with FastAPI, a high-performance Python web framework.",
-                "content": "FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints. In this comprehensive guide, we'll explore how to get started with FastAPI, set up your first project, and build a RESTful API.\n\n## Installation\n\nFirst, install FastAPI and Uvicorn:\n```bash\npip install fastapi uvicorn\n```\n\n## Creating Your First API\n\nLet's create a simple API endpoint:\n```python\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get(\"/\")\ndef read_root():\n    return {\"Hello\": \"World\"}\n```\n\n## Running the Server\n\nStart your server with:\n```bash\nuvicorn main:app --reload\n```\n\nFastAPI automatically generates interactive API documentation at `/docs` and `/redoc`.",
+                "content": "<p>FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints. In this comprehensive guide, we'll explore how to get started with FastAPI, set up your first project, and build a RESTful API.</p><h2>Installation</h2><p>First, install FastAPI and Uvicorn:</p><pre class=\"language-bash\"><code>pip install fastapi uvicorn</code></pre><h2>Creating Your First API</h2><p>Let's create a simple API endpoint:</p><pre class=\"language-python\"><code>from fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get(\"/\")\ndef read_root():\n    return {\"Hello\": \"World\"}</code></pre><h2>Running the Server</h2><p>Start your server with:</p><pre class=\"language-bash\"><code>uvicorn main:app --reload</code></pre><p>FastAPI automatically generates interactive API documentation at <code>/docs</code> and <code>/redoc</code>.</p>",
                 "category": "Python",
                 "tags": ["FastAPI", "REST API"],
                 "meta_title": "Getting Started with FastAPI - Complete Guide",
@@ -122,7 +122,7 @@ class MongoSeeder:
                 "title": "Building RESTful APIs: Best Practices",
                 "slug": "building-restful-apis-best-practices",
                 "excerpt": "Discover the essential best practices for designing and implementing RESTful APIs that are scalable and maintainable.",
-                "content": "RESTful APIs are the backbone of modern web applications. In this article, we'll explore best practices for designing and implementing RESTful APIs that are scalable, maintainable, and developer-friendly.\n\n## Use Proper HTTP Methods\n\n- GET: Retrieve resources\n- POST: Create new resources\n- PUT: Update entire resources\n- PATCH: Partial updates\n- DELETE: Remove resources\n\n## Consistent Naming Conventions\n\nUse plural nouns for resource names:\n- `/api/users` (not `/api/user`)\n- `/api/posts` (not `/api/post`)\n\n## Versioning\n\nAlways version your APIs:\n- `/api/v1/users`\n- `/api/v2/users`\n\n## Error Handling\n\nReturn appropriate HTTP status codes and consistent error formats.",
+                "content": "<p>RESTful APIs are the backbone of modern web applications. In this article, we'll explore best practices for designing and implementing RESTful APIs that are scalable, maintainable, and developer-friendly.</p><h2>Use Proper HTTP Methods</h2><ul><li><strong>GET:</strong> Retrieve resources</li><li><strong>POST:</strong> Create new resources</li><li><strong>PUT:</strong> Update entire resources</li><li><strong>PATCH:</strong> Partial updates</li><li><strong>DELETE:</strong> Remove resources</li></ul><h2>Consistent Naming Conventions</h2><p>Use plural nouns for resource names:</p><ul><li><code>/api/users</code> (not <code>/api/user</code>)</li><li><code>/api/posts</code> (not <code>/api/post</code>)</li></ul><h2>Versioning</h2><p>Always version your APIs:</p><ul><li><code>/api/v1/users</code></li><li><code>/api/v2/users</code></li></ul><h2>Error Handling</h2><p>Return appropriate HTTP status codes and consistent error formats.</p>",
                 "category": "Web Development",
                 "tags": ["REST API", "Best Practices"],
                 "meta_title": "RESTful API Best Practices Guide"
@@ -131,7 +131,7 @@ class MongoSeeder:
                 "title": "React Hooks: A Complete Guide",
                 "slug": "react-hooks-complete-guide",
                 "excerpt": "Master React Hooks with this comprehensive guide covering useState, useEffect, and custom hooks.",
-                "content": "React Hooks revolutionized how we write React components. Introduced in React 16.8, hooks allow you to use state and other React features without writing a class.\n\n## useState Hook\n\nThe useState hook lets you add state to functional components:\n```javascript\nimport { useState } from 'react';\n\nfunction Counter() {\n  const [count, setCount] = useState(0);\n  return (\n    <div>\n      <p>You clicked {count} times</p>\n      <button onClick={() => setCount(count + 1)}>Click me</button>\n    </div>\n  );\n}\n```\n\n## useEffect Hook\n\nuseEffect lets you perform side effects in functional components:\n```javascript\nuseEffect(() => {\n  document.title = `You clicked ${count} times`;\n}, [count]);\n```\n\n## Custom Hooks\n\nYou can create custom hooks to share stateful logic between components.",
+                "content": "<p>React Hooks revolutionized how we write React components. Introduced in React 16.8, hooks allow you to use state and other React features without writing a class.</p><h2>useState Hook</h2><p>The useState hook lets you add state to functional components:</p><pre class=\"language-javascript\"><code>import { useState } from 'react';\n\nfunction Counter() {\n  const [count, setCount] = useState(0);\n  return (\n    &lt;div&gt;\n      &lt;p&gt;You clicked {count} times&lt;/p&gt;\n      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;Click me&lt;/button&gt;\n    &lt;/div&gt;\n  );\n}</code></pre><h2>useEffect Hook</h2><p>useEffect lets you perform side effects in functional components:</p><pre class=\"language-javascript\"><code>useEffect(() =&gt; {\n  document.title = `You clicked ${count} times`;\n}, [count]);</code></pre><h2>Custom Hooks</h2><p>You can create custom hooks to share stateful logic between components.</p>",
                 "category": "JavaScript",
                 "tags": ["React", "JavaScript", "Best Practices"]
             },
@@ -139,7 +139,7 @@ class MongoSeeder:
                 "title": "Docker Containerization: From Basics to Production",
                 "slug": "docker-containerization-basics-production",
                 "excerpt": "Learn Docker from the ground up and deploy containerized applications to production.",
-                "content": "Docker has become the standard for containerization in modern software development. This guide will take you from Docker basics to production deployment.\n\n## What is Docker?\n\nDocker is a platform for developing, shipping, and running applications in containers. Containers package an application with all its dependencies.\n\n## Basic Docker Commands\n\n```bash\n# Build an image\ndocker build -t myapp .\n\n# Run a container\ndocker run -p 3000:3000 myapp\n\n# List containers\ndocker ps\n\n# View logs\ndocker logs <container_id>\n```\n\n## Dockerfile Best Practices\n\n- Use multi-stage builds\n- Minimize layers\n- Use .dockerignore\n- Don't run as root\n\n## Docker Compose\n\nDocker Compose allows you to define and run multi-container applications.",
+                "content": "<p>Docker has become the standard for containerization in modern software development. This guide will take you from Docker basics to production deployment.</p><h2>What is Docker?</h2><p>Docker is a platform for developing, shipping, and running applications in containers. Containers package an application with all its dependencies.</p><h2>Basic Docker Commands</h2><pre class=\"language-bash\"><code># Build an image\ndocker build -t myapp .\n\n# Run a container\ndocker run -p 3000:3000 myapp\n\n# List containers\ndocker ps\n\n# View logs\ndocker logs &lt;container_id&gt;</code></pre><h2>Dockerfile Best Practices</h2><ul><li>Use multi-stage builds</li><li>Minimize layers</li><li>Use .dockerignore</li><li>Don't run as root</li></ul><h2>Docker Compose</h2><p>Docker Compose allows you to define and run multi-container applications.</p>",
                 "category": "DevOps",
                 "tags": ["Docker", "DevOps", "Best Practices"]
             },
@@ -147,7 +147,7 @@ class MongoSeeder:
                 "title": "MongoDB Aggregation Pipeline Explained",
                 "slug": "mongodb-aggregation-pipeline-explained",
                 "excerpt": "Master MongoDB's powerful aggregation framework with practical examples and use cases.",
-                "content": "MongoDB's aggregation pipeline is a powerful framework for data processing. It allows you to transform and combine documents from a collection.\n\n## Pipeline Stages\n\nThe aggregation pipeline consists of stages:\n- $match: Filter documents\n- $group: Group documents\n- $sort: Sort documents\n- $project: Reshape documents\n- $lookup: Join collections\n\n## Example\n\n```javascript\ndb.orders.aggregate([\n  { $match: { status: \"completed\" } },\n  { $group: { _id: \"$customer\", total: { $sum: \"$amount\" } } },\n  { $sort: { total: -1 } }\n])\n```\n\n## Performance Tips\n\n- Use indexes\n- Filter early with $match\n- Limit results\n- Use $project to reduce data",
+                "content": "<p>MongoDB's aggregation pipeline is a powerful framework for data processing. It allows you to transform and combine documents from a collection.</p><h2>Pipeline Stages</h2><p>The aggregation pipeline consists of stages:</p><ul><li><code>$match</code>: Filter documents</li><li><code>$group</code>: Group documents</li><li><code>$sort</code>: Sort documents</li><li><code>$project</code>: Reshape documents</li><li><code>$lookup</code>: Join collections</li></ul><h2>Example</h2><pre class=\"language-javascript\"><code>db.orders.aggregate([\n  { $match: { status: \"completed\" } },\n  { $group: { _id: \"$customer\", total: { $sum: \"$amount\" } } },\n  { $sort: { total: -1 } }\n])</code></pre><h2>Performance Tips</h2><ul><li>Use indexes</li><li>Filter early with <code>$match</code></li><li>Limit results</li><li>Use <code>$project</code> to reduce data</li></ul>",
                 "category": "Database",
                 "tags": ["MongoDB", "Database", "Best Practices"]
             },
@@ -155,7 +155,7 @@ class MongoSeeder:
                 "title": "TypeScript: Type Safety in JavaScript",
                 "slug": "typescript-type-safety-javascript",
                 "excerpt": "Discover how TypeScript brings type safety to JavaScript development.",
-                "content": "TypeScript is a typed superset of JavaScript that compiles to plain JavaScript. It adds static type definitions to JavaScript.\n\n## Why TypeScript?\n\n- Catch errors early\n- Better IDE support\n- Improved code documentation\n- Easier refactoring\n\n## Basic Types\n\n```typescript\nlet name: string = \"John\";\nlet age: number = 30;\nlet isActive: boolean = true;\nlet items: string[] = [\"apple\", \"banana\"];\n```\n\n## Interfaces\n\n```typescript\ninterface User {\n  id: number;\n  name: string;\n  email?: string;\n}\n\nconst user: User = {\n  id: 1,\n  name: \"John\"\n};\n```\n\n## Generics\n\nTypeScript generics allow you to create reusable components.",
+                "content": "<p>TypeScript is a typed superset of JavaScript that compiles to plain JavaScript. It adds static type definitions to JavaScript.</p><h2>Why TypeScript?</h2><ul><li>Catch errors early</li><li>Better IDE support</li><li>Improved code documentation</li><li>Easier refactoring</li></ul><h2>Basic Types</h2><pre class=\"language-typescript\"><code>let name: string = \"John\";\nlet age: number = 30;\nlet isActive: boolean = true;\nlet items: string[] = [\"apple\", \"banana\"];</code></pre><h2>Interfaces</h2><pre class=\"language-typescript\"><code>interface User {\n  id: number;\n  name: string;\n  email?: string;\n}\n\nconst user: User = {\n  id: 1,\n  name: \"John\"\n};</code></pre><h2>Generics</h2><p>TypeScript generics allow you to create reusable components.</p>",
                 "category": "JavaScript",
                 "tags": ["TypeScript", "JavaScript", "Best Practices"]
             },
@@ -163,7 +163,7 @@ class MongoSeeder:
                 "title": "AWS Cloud Services Overview",
                 "slug": "aws-cloud-services-overview",
                 "excerpt": "An introduction to Amazon Web Services and its key services for developers.",
-                "content": "Amazon Web Services (AWS) is a comprehensive cloud computing platform offering over 200 services. This article provides an overview of key AWS services.\n\n## Core Services\n\n### EC2 (Elastic Compute Cloud)\nVirtual servers in the cloud.\n\n### S3 (Simple Storage Service)\nObject storage for files and data.\n\n### RDS (Relational Database Service)\nManaged database service.\n\n### Lambda\nServerless compute service.\n\n## Getting Started\n\n1. Create an AWS account\n2. Set up IAM users\n3. Configure AWS CLI\n4. Deploy your first service\n\n## Best Practices\n\n- Use IAM roles\n- Enable CloudTrail\n- Set up billing alerts\n- Use multiple availability zones",
+                "content": "<p>Amazon Web Services (AWS) is a comprehensive cloud computing platform offering over 200 services. This article provides an overview of key AWS services.</p><h2>Core Services</h2><h3>EC2 (Elastic Compute Cloud)</h3><p>Virtual servers in the cloud.</p><h3>S3 (Simple Storage Service)</h3><p>Object storage for files and data.</p><h3>RDS (Relational Database Service)</h3><p>Managed database service.</p><h3>Lambda</h3><p>Serverless compute service.</p><h2>Getting Started</h2><ol><li>Create an AWS account</li><li>Set up IAM users</li><li>Configure AWS CLI</li><li>Deploy your first service</li></ol><h2>Best Practices</h2><ul><li>Use IAM roles</li><li>Enable CloudTrail</li><li>Set up billing alerts</li><li>Use multiple availability zones</li></ul>",
                 "category": "Cloud Computing",
                 "tags": ["AWS", "Cloud Computing", "Best Practices"]
             },
@@ -171,7 +171,7 @@ class MongoSeeder:
                 "title": "Testing Strategies for Modern Applications",
                 "slug": "testing-strategies-modern-applications",
                 "excerpt": "Learn effective testing strategies including unit, integration, and end-to-end testing.",
-                "content": "Testing is crucial for maintaining code quality and preventing bugs. This guide covers different testing strategies.\n\n## Types of Tests\n\n### Unit Tests\nTest individual components in isolation.\n\n### Integration Tests\nTest how components work together.\n\n### E2E Tests\nTest the entire application flow.\n\n## Testing Pyramid\n\n- Many unit tests (base)\n- Some integration tests (middle)\n- Few E2E tests (top)\n\n## Tools\n\n- Jest for JavaScript\n- Pytest for Python\n- Cypress for E2E\n\n## Best Practices\n\n- Write tests first (TDD)\n- Keep tests independent\n- Use mocks sparingly\n- Test edge cases",
+                "content": "<p>Testing is crucial for maintaining code quality and preventing bugs. This guide covers different testing strategies.</p><h2>Types of Tests</h2><h3>Unit Tests</h3><p>Test individual components in isolation.</p><h3>Integration Tests</h3><p>Test how components work together.</p><h3>E2E Tests</h3><p>Test the entire application flow.</p><h2>Testing Pyramid</h2><ul><li>Many unit tests (base)</li><li>Some integration tests (middle)</li><li>Few E2E tests (top)</li></ul><h2>Tools</h2><ul><li>Jest for JavaScript</li><li>Pytest for Python</li><li>Cypress for E2E</li></ul><h2>Best Practices</h2><ul><li>Write tests first (TDD)</li><li>Keep tests independent</li><li>Use mocks sparingly</li><li>Test edge cases</li></ul>",
                 "category": "Tutorials",
                 "tags": ["Testing", "Best Practices", "Performance"]
             },
@@ -179,7 +179,7 @@ class MongoSeeder:
                 "title": "Performance Optimization Techniques",
                 "slug": "performance-optimization-techniques",
                 "excerpt": "Essential techniques to improve application performance and user experience.",
-                "content": "Performance optimization is critical for user experience. This article covers key optimization techniques.\n\n## Frontend Optimization\n\n- Code splitting\n- Lazy loading\n- Image optimization\n- Caching strategies\n\n## Backend Optimization\n\n- Database indexing\n- Query optimization\n- Caching layers\n- Connection pooling\n\n## Monitoring\n\n- Use APM tools\n- Monitor key metrics\n- Set up alerts\n- Regular profiling\n\n## Tools\n\n- Lighthouse for web performance\n- New Relic for APM\n- Redis for caching",
+                "content": "<p>Performance optimization is critical for user experience. This article covers key optimization techniques.</p><h2>Frontend Optimization</h2><ul><li>Code splitting</li><li>Lazy loading</li><li>Image optimization</li><li>Caching strategies</li></ul><h2>Backend Optimization</h2><ul><li>Database indexing</li><li>Query optimization</li><li>Caching layers</li><li>Connection pooling</li></ul><h2>Monitoring</h2><ul><li>Use APM tools</li><li>Monitor key metrics</li><li>Set up alerts</li><li>Regular profiling</li></ul><h2>Tools</h2><ul><li>Lighthouse for web performance</li><li>New Relic for APM</li><li>Redis for caching</li></ul>",
                 "category": "Web Development",
                 "tags": ["Performance", "Best Practices"]
             },
@@ -187,7 +187,7 @@ class MongoSeeder:
                 "title": "Security Best Practices for Web Applications",
                 "slug": "security-best-practices-web-applications",
                 "excerpt": "Essential security practices to protect your web applications from common vulnerabilities.",
-                "content": "Security is paramount in web development. This guide covers essential security practices.\n\n## Common Vulnerabilities\n\n- SQL Injection\n- XSS (Cross-Site Scripting)\n- CSRF (Cross-Site Request Forgery)\n- Authentication flaws\n\n## Best Practices\n\n### Input Validation\nAlways validate and sanitize user input.\n\n### Authentication\n- Use strong passwords\n- Implement 2FA\n- Secure session management\n\n### HTTPS\nAlways use HTTPS in production.\n\n### Dependency Management\nKeep dependencies updated and scan for vulnerabilities.\n\n## Tools\n\n- OWASP ZAP for security testing\n- Snyk for dependency scanning\n- Helmet.js for Express security",
+                "content": "<p>Security is paramount in web development. This guide covers essential security practices.</p><h2>Common Vulnerabilities</h2><ul><li>SQL Injection</li><li>XSS (Cross-Site Scripting)</li><li>CSRF (Cross-Site Request Forgery)</li><li>Authentication flaws</li></ul><h2>Best Practices</h2><h3>Input Validation</h3><p>Always validate and sanitize user input.</p><h3>Authentication</h3><ul><li>Use strong passwords</li><li>Implement 2FA</li><li>Secure session management</li></ul><h3>HTTPS</h3><p>Always use HTTPS in production.</p><h3>Dependency Management</h3><p>Keep dependencies updated and scan for vulnerabilities.</p><h2>Tools</h2><ul><li>OWASP ZAP for security testing</li><li>Snyk for dependency scanning</li><li>Helmet.js for Express security</li></ul>",
                 "category": "Security",
                 "tags": ["Best Practices"]
             },
@@ -195,7 +195,7 @@ class MongoSeeder:
                 "title": "Introduction to Machine Learning",
                 "slug": "introduction-machine-learning",
                 "excerpt": "A beginner-friendly introduction to machine learning concepts and applications.",
-                "content": "Machine Learning is transforming industries. This article provides an introduction to ML concepts.\n\n## What is Machine Learning?\n\nMachine Learning enables computers to learn from data without explicit programming.\n\n## Types of Learning\n\n### Supervised Learning\nLearning with labeled data.\n\n### Unsupervised Learning\nFinding patterns in unlabeled data.\n\n### Reinforcement Learning\nLearning through interaction and rewards.\n\n## Common Algorithms\n\n- Linear Regression\n- Decision Trees\n- Neural Networks\n- K-Means Clustering\n\n## Getting Started\n\n- Learn Python\n- Study mathematics (linear algebra, statistics)\n- Practice with datasets\n- Use libraries like scikit-learn",
+                "content": "<p>Machine Learning is transforming industries. This article provides an introduction to ML concepts.</p><h2>What is Machine Learning?</h2><p>Machine Learning enables computers to learn from data without explicit programming.</p><h2>Types of Learning</h2><h3>Supervised Learning</h3><p>Learning with labeled data.</p><h3>Unsupervised Learning</h3><p>Finding patterns in unlabeled data.</p><h3>Reinforcement Learning</h3><p>Learning through interaction and rewards.</p><h2>Common Algorithms</h2><ul><li>Linear Regression</li><li>Decision Trees</li><li>Neural Networks</li><li>K-Means Clustering</li></ul><h2>Getting Started</h2><ul><li>Learn Python</li><li>Study mathematics (linear algebra, statistics)</li><li>Practice with datasets</li><li>Use libraries like scikit-learn</li></ul>",
                 "category": "Machine Learning",
                 "tags": ["Best Practices"]
             },
@@ -203,7 +203,7 @@ class MongoSeeder:
                 "title": "Mobile App Development: React Native vs Flutter",
                 "slug": "mobile-app-development-react-native-vs-flutter",
                 "excerpt": "Compare React Native and Flutter to choose the right framework for your mobile app project.",
-                "content": "Choosing between React Native and Flutter is a common dilemma. This article compares both frameworks.\n\n## React Native\n\n### Pros\n- Large community\n- JavaScript/TypeScript\n- Hot reload\n- Native performance\n\n### Cons\n- Platform-specific code needed\n- Larger app size\n\n## Flutter\n\n### Pros\n- Single codebase\n- Fast performance\n- Beautiful UI\n- Strong typing (Dart)\n\n### Cons\n- Smaller community\n- Newer ecosystem\n\n## When to Choose What?\n\n- React Native: If you know JavaScript\n- Flutter: If you want consistent UI across platforms",
+                "content": "<p>Choosing between React Native and Flutter is a common dilemma. This article compares both frameworks.</p><h2>React Native</h2><h3>Pros</h3><ul><li>Large community</li><li>JavaScript/TypeScript</li><li>Hot reload</li><li>Native performance</li></ul><h3>Cons</h3><ul><li>Platform-specific code needed</li><li>Larger app size</li></ul><h2>Flutter</h2><h3>Pros</h3><ul><li>Single codebase</li><li>Fast performance</li><li>Beautiful UI</li><li>Strong typing (Dart)</li></ul><h3>Cons</h3><ul><li>Smaller community</li><li>Newer ecosystem</li></ul><h2>When to Choose What?</h2><ul><li><strong>React Native:</strong> If you know JavaScript</li><li><strong>Flutter:</strong> If you want consistent UI across platforms</li></ul>",
                 "category": "Mobile Development",
                 "tags": ["React", "Mobile Development", "Best Practices"]
             },
@@ -211,7 +211,7 @@ class MongoSeeder:
                 "title": "Building Scalable Microservices Architecture",
                 "slug": "building-scalable-microservices-architecture",
                 "excerpt": "Learn how to design and implement scalable microservices architectures.",
-                "content": "Microservices architecture breaks applications into small, independent services. This guide covers best practices.\n\n## Benefits\n\n- Independent deployment\n- Technology diversity\n- Scalability\n- Fault isolation\n\n## Challenges\n\n- Service communication\n- Data consistency\n- Distributed tracing\n- Deployment complexity\n\n## Design Principles\n\n- Single responsibility\n- API-first design\n- Stateless services\n- Proper service boundaries\n\n## Communication Patterns\n\n- REST APIs\n- Message queues\n- Event-driven architecture",
+                "content": "<p>Microservices architecture breaks applications into small, independent services. This guide covers best practices.</p><h2>Benefits</h2><ul><li>Independent deployment</li><li>Technology diversity</li><li>Scalability</li><li>Fault isolation</li></ul><h2>Challenges</h2><ul><li>Service communication</li><li>Data consistency</li><li>Distributed tracing</li><li>Deployment complexity</li></ul><h2>Design Principles</h2><ul><li>Single responsibility</li><li>API-first design</li><li>Stateless services</li><li>Proper service boundaries</li></ul><h2>Communication Patterns</h2><ul><li>REST APIs</li><li>Message queues</li><li>Event-driven architecture</li></ul>",
                 "category": "Web Development",
                 "tags": ["REST API", "Best Practices", "Performance"]
             },
@@ -219,7 +219,7 @@ class MongoSeeder:
                 "title": "FastAPI Authentication and Authorization",
                 "slug": "fastapi-authentication-authorization",
                 "excerpt": "Implement secure authentication and authorization in FastAPI applications.",
-                "content": "Security is crucial for APIs. This tutorial shows how to implement authentication in FastAPI.\n\n## JWT Authentication\n\n```python\nfrom jose import jwt\nfrom datetime import datetime, timedelta\n\nSECRET_KEY = \"your-secret-key\"\nALGORITHM = \"HS256\"\n\ndef create_access_token(data: dict):\n    to_encode = data.copy()\n    expire = datetime.utcnow() + timedelta(minutes=15)\n    to_encode.update({\"exp\": expire})\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n```\n\n## Dependency Injection\n\nUse FastAPI dependencies for authentication:\n```python\nfrom fastapi import Depends, HTTPException\n\ndef get_current_user(token: str = Depends(oauth2_scheme)):\n    # Verify token\n    return user\n```",
+                "content": "<p>Security is crucial for APIs. This tutorial shows how to implement authentication in FastAPI.</p><h2>JWT Authentication</h2><pre class=\"language-python\"><code>from jose import jwt\nfrom datetime import datetime, timedelta\n\nSECRET_KEY = \"your-secret-key\"\nALGORITHM = \"HS256\"\n\ndef create_access_token(data: dict):\n    to_encode = data.copy()\n    expire = datetime.utcnow() + timedelta(minutes=15)\n    to_encode.update({\"exp\": expire})\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)</code></pre><h2>Dependency Injection</h2><p>Use FastAPI dependencies for authentication:</p><pre class=\"language-python\"><code>from fastapi import Depends, HTTPException\n\ndef get_current_user(token: str = Depends(oauth2_scheme)):\n    # Verify token\n    return user</code></pre>",
                 "category": "Python",
                 "tags": ["FastAPI", "REST API", "Best Practices"]
             },
@@ -227,7 +227,7 @@ class MongoSeeder:
                 "title": "MongoDB Indexing Strategies",
                 "slug": "mongodb-indexing-strategies",
                 "excerpt": "Optimize MongoDB queries with effective indexing strategies.",
-                "content": "Proper indexing is crucial for MongoDB performance. This article covers indexing strategies.\n\n## Types of Indexes\n\n- Single field indexes\n- Compound indexes\n- Text indexes\n- Geospatial indexes\n\n## Index Creation\n\n```javascript\ndb.collection.createIndex({ field: 1 })\ndb.collection.createIndex({ field1: 1, field2: -1 })\n```\n\n## Best Practices\n\n- Index frequently queried fields\n- Consider query patterns\n- Monitor index usage\n- Avoid over-indexing\n\n## Index Analysis\n\nUse explain() to analyze query performance:\n```javascript\ndb.collection.find({ field: value }).explain(\"executionStats\")\n```",
+                "content": "<p>Proper indexing is crucial for MongoDB performance. This article covers indexing strategies.</p><h2>Types of Indexes</h2><ul><li>Single field indexes</li><li>Compound indexes</li><li>Text indexes</li><li>Geospatial indexes</li></ul><h2>Index Creation</h2><pre class=\"language-javascript\"><code>db.collection.createIndex({ field: 1 })\ndb.collection.createIndex({ field1: 1, field2: -1 })</code></pre><h2>Best Practices</h2><ul><li>Index frequently queried fields</li><li>Consider query patterns</li><li>Monitor index usage</li><li>Avoid over-indexing</li></ul><h2>Index Analysis</h2><p>Use explain() to analyze query performance:</p><pre class=\"language-javascript\"><code>db.collection.find({ field: value }).explain(\"executionStats\")</code></pre>",
                 "category": "Database",
                 "tags": ["MongoDB", "Database", "Performance"]
             },
@@ -235,7 +235,7 @@ class MongoSeeder:
                 "title": "React State Management: Redux vs Context API",
                 "slug": "react-state-management-redux-vs-context-api",
                 "excerpt": "Compare Redux and Context API for state management in React applications.",
-                "content": "State management is crucial for React applications. This article compares Redux and Context API.\n\n## Context API\n\n### Pros\n- Built into React\n- Simple for small apps\n- No extra dependencies\n\n### Cons\n- Can cause re-renders\n- Not ideal for complex state\n\n## Redux\n\n### Pros\n- Predictable state updates\n- Great DevTools\n- Time-travel debugging\n\n### Cons\n- More boilerplate\n- Learning curve\n- Additional dependency\n\n## When to Use What?\n\n- Context API: Small to medium apps\n- Redux: Complex state, large teams",
+                "content": "<p>State management is crucial for React applications. This article compares Redux and Context API.</p><h2>Context API</h2><h3>Pros</h3><ul><li>Built into React</li><li>Simple for small apps</li><li>No extra dependencies</li></ul><h3>Cons</h3><ul><li>Can cause re-renders</li><li>Not ideal for complex state</li></ul><h2>Redux</h2><h3>Pros</h3><ul><li>Predictable state updates</li><li>Great DevTools</li><li>Time-travel debugging</li></ul><h3>Cons</h3><ul><li>More boilerplate</li><li>Learning curve</li><li>Additional dependency</li></ul><h2>When to Use What?</h2><ul><li><strong>Context API:</strong> Small to medium apps</li><li><strong>Redux:</strong> Complex state, large teams</li></ul>",
                 "category": "JavaScript",
                 "tags": ["React", "JavaScript", "Best Practices"]
             },
@@ -243,7 +243,7 @@ class MongoSeeder:
                 "title": "Docker Compose for Multi-Container Applications",
                 "slug": "docker-compose-multi-container-applications",
                 "excerpt": "Learn how to orchestrate multiple containers with Docker Compose.",
-                "content": "Docker Compose simplifies multi-container application management. This guide covers the essentials.\n\n## docker-compose.yml\n\n```yaml\nversion: '3.8'\nservices:\n  web:\n    build: .\n    ports:\n      - \"8000:8000\"\n  db:\n    image: postgres:13\n    environment:\n      POSTGRES_PASSWORD: password\n```\n\n## Common Commands\n\n```bash\ndocker-compose up\ndocker-compose down\ndocker-compose logs\ndocker-compose ps\n```\n\n## Networking\n\nServices can communicate using service names as hostnames.\n\n## Volumes\n\nPersist data with volumes:\n```yaml\nvolumes:\n  - ./data:/var/lib/postgresql/data\n```",
+                "content": "<p>Docker Compose simplifies multi-container application management. This guide covers the essentials.</p><h2>docker-compose.yml</h2><pre class=\"language-yaml\"><code>version: '3.8'\nservices:\n  web:\n    build: .\n    ports:\n      - \"8000:8000\"\n  db:\n    image: postgres:13\n    environment:\n      POSTGRES_PASSWORD: password</code></pre><h2>Common Commands</h2><pre class=\"language-bash\"><code>docker-compose up\ndocker-compose down\ndocker-compose logs\ndocker-compose ps</code></pre><h2>Networking</h2><p>Services can communicate using service names as hostnames.</p><h2>Volumes</h2><p>Persist data with volumes:</p><pre class=\"language-yaml\"><code>volumes:\n  - ./data:/var/lib/postgresql/data</code></pre>",
                 "category": "DevOps",
                 "tags": ["Docker", "DevOps", "Best Practices"]
             },
@@ -251,7 +251,7 @@ class MongoSeeder:
                 "title": "TypeScript Advanced Types and Patterns",
                 "slug": "typescript-advanced-types-patterns",
                 "excerpt": "Explore advanced TypeScript types and design patterns for better code quality.",
-                "content": "TypeScript offers powerful type system features. This article covers advanced types.\n\n## Union Types\n\n```typescript\ntype Status = \"pending\" | \"approved\" | \"rejected\";\n```\n\n## Intersection Types\n\n```typescript\ntype User = Person & Account;\n```\n\n## Conditional Types\n\n```typescript\ntype NonNullable<T> = T extends null | undefined ? never : T;\n```\n\n## Mapped Types\n\n```typescript\ntype Readonly<T> = {\n  readonly [P in keyof T]: T[P];\n};\n```\n\n## Utility Types\n\n- Partial<T>\n- Required<T>\n- Pick<T, K>\n- Omit<T, K>",
+                "content": "<p>TypeScript offers powerful type system features. This article covers advanced types.</p><h2>Union Types</h2><pre class=\"language-typescript\"><code>type Status = \"pending\" | \"approved\" | \"rejected\";</code></pre><h2>Intersection Types</h2><pre class=\"language-typescript\"><code>type User = Person & Account;</code></pre><h2>Conditional Types</h2><pre class=\"language-typescript\"><code>type NonNullable&lt;T&gt; = T extends null | undefined ? never : T;</code></pre><h2>Mapped Types</h2><pre class=\"language-typescript\"><code>type Readonly&lt;T&gt; = {\n  readonly [P in keyof T]: T[P];\n};</code></pre><h2>Utility Types</h2><ul><li><code>Partial&lt;T&gt;</code></li><li><code>Required&lt;T&gt;</code></li><li><code>Pick&lt;T, K&gt;</code></li><li><code>Omit&lt;T, K&gt;</code></li></ul>",
                 "category": "JavaScript",
                 "tags": ["TypeScript", "JavaScript", "Best Practices"]
             },
@@ -259,7 +259,7 @@ class MongoSeeder:
                 "title": "AWS Lambda: Serverless Functions Guide",
                 "slug": "aws-lambda-serverless-functions-guide",
                 "excerpt": "Build and deploy serverless functions with AWS Lambda.",
-                "content": "AWS Lambda lets you run code without managing servers. This guide covers Lambda basics.\n\n## What is Lambda?\n\nLambda is a serverless compute service that runs your code in response to events.\n\n## Creating a Lambda Function\n\n```python\nimport json\n\ndef lambda_handler(event, context):\n    return {\n        'statusCode': 200,\n        'body': json.dumps('Hello from Lambda!')\n    }\n```\n\n## Triggers\n\n- API Gateway\n- S3 events\n- DynamoDB streams\n- CloudWatch Events\n\n## Best Practices\n\n- Keep functions small\n- Use environment variables\n- Implement proper error handling\n- Monitor with CloudWatch",
+                "content": "<p>AWS Lambda lets you run code without managing servers. This guide covers Lambda basics.</p><h2>What is Lambda?</h2><p>Lambda is a serverless compute service that runs your code in response to events.</p><h2>Creating a Lambda Function</h2><pre class=\"language-python\"><code>import json\n\ndef lambda_handler(event, context):\n    return {\n        'statusCode': 200,\n        'body': json.dumps('Hello from Lambda!')\n    }</code></pre><h2>Triggers</h2><ul><li>API Gateway</li><li>S3 events</li><li>DynamoDB streams</li><li>CloudWatch Events</li></ul><h2>Best Practices</h2><ul><li>Keep functions small</li><li>Use environment variables</li><li>Implement proper error handling</li><li>Monitor with CloudWatch</li></ul>",
                 "category": "Cloud Computing",
                 "tags": ["AWS", "Cloud Computing", "Best Practices"]
             },
@@ -267,9 +267,7 @@ class MongoSeeder:
                 "title": "API Rate Limiting Strategies",
                 "slug": "api-rate-limiting-strategies",
                 "excerpt": "Implement effective rate limiting to protect your APIs from abuse.",
-                "content": "Rate limiting protects APIs from abuse and ensures fair resource usage. This article covers rate limiting strategies.\n\n## Why Rate Limiting?\n\n- Prevent abuse\n- Ensure fair usage\n- Protect resources\n- Improve reliability\n\n## Strategies\n\n### Fixed Window\nLimit requests per time window.\n\n### Sliding Window\nMore accurate but complex.\n\n### Token Bucket\nAllows bursts of traffic.\n\n## Implementation\n\nUse Redis for distributed rate limiting:\n```python\nimport redis\nr = redis.Redis()\n\nkey = f\"rate_limit:{user_id}\"\ncount = r.incr(key)\nif count == 1:\n    r.expire(key, 60)\n```\n\n## Best Practices\n\n- Set appropriate limits\n- Return clear error messages\n- Use HTTP 429 status code",
-                "category": "Web Development",
-                "tags": ["REST API", "Performance", "Best Practices"]
+                "content": "<p>Rate limiting protects APIs from abuse and ensures fair resource usage. This article covers rate limiting strategies.</p><h2>Why Rate Limiting?</h2><ul><li>Prevent abuse</li><li>Ensure fair usage</li><li>Protect resources</li><li>Improve reliability</li></ul><h2>Strategies</h2><h3>Fixed Window</h3><p>Limit requests per time window.</p><h3>Sliding Window</h3><p>More accurate but complex.</p><h3>Token Bucket</h3><p>Allows bursts of traffic.</p><h2>Implementation</h2><p>Use Redis for distributed rate limiting:</p><pre class=\"language-python\"><code>import redis\nr = redis.Redis()\n\nkey = f\"rate_limit:{user_id}\"\ncount = r.incr(key)\nif count == 1:\n    r.expire(key, 60)</code></pre><h2>Best Practices</h2><ul><li>Set appropriate limits</li><li>Return clear error messages</li><li>Use HTTP 429 status code</li></ul>"
             }
         ]
         
@@ -306,8 +304,8 @@ class MongoSeeder:
                 )
                 
                 # Publish the post
-                if post and post.get("_id"):
-                    await self.post_service.publish_post(str(post["_id"]))
+                if post and post.id:
+                    await self.post_service.publish_post(str(post.id))
                     created_count += 1
                     print(f"Created and published post: {post_data['title']}")
                 
